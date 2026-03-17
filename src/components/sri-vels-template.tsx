@@ -31,8 +31,10 @@ export const SriVelsTemplate: React.FC<SriVelsTemplateProps> = ({ data }) => {
         fromName: data.fromName || 'Your Company',
         fromRegNo: data.fromRegNo,
         fromAddress: data.fromAddress || '123 Main St\nAnytown, USA',
+        fromEmail: data.fromEmail,
         toName: data.toName || 'Client Company',
         toAddress: data.toAddress || '456 Client Ave\nClient City, USA',
+        toEmail: data.toEmail,
         invoiceDate: data.invoiceDate || new Date(),
         dueDate: data.dueDate || new Date(),
         items: data.items.length > 0 ? data.items : [{ description: 'Example Service', quantity: '1', price: '100.00' }],
@@ -49,6 +51,7 @@ export const SriVelsTemplate: React.FC<SriVelsTemplateProps> = ({ data }) => {
                     {safeData.fromRegNo && <div className="text-xs text-gray-600 mb-2">{safeData.fromRegNo}</div>}
                     <div className="text-xs text-gray-800 whitespace-pre-line">
                         {safeData.fromAddress}
+                        {safeData.fromEmail && <>{'\n'}{safeData.fromEmail}</>}
                     </div>
                 </div>
                 <div className="text-right flex-shrink-0 ml-8">
@@ -76,7 +79,10 @@ export const SriVelsTemplate: React.FC<SriVelsTemplateProps> = ({ data }) => {
                 <div>
                     <div className="text-[10px] uppercase font-bold tracking-widest text-gray-600 border-b border-gray-300 pb-1 mb-2">Bill To</div>
                     <div className="font-semibold">{safeData.toName}</div>
-                    <div className="whitespace-pre-line">{safeData.toAddress}</div>
+                    <div className="whitespace-pre-line">
+                        {safeData.toAddress}
+                        {safeData.toEmail && <>{'\n'}{safeData.toEmail}</>}
+                    </div>
                 </div>
             </div>
 
@@ -148,10 +154,10 @@ export const SriVelsTemplate: React.FC<SriVelsTemplateProps> = ({ data }) => {
                         <>
                         <div className="text-[10px] uppercase font-bold tracking-widest text-gray-600 border-b border-gray-300 pb-1 mb-2">Payment Details</div>
                         <div className="space-y-1">
-                            {safeData.paymentDetails.bankName && <p><strong>Bank:</strong> {safeData.paymentDetails.bankName}</p>}
-                            {safeData.paymentDetails.accountName && <p><strong>Account Name:</strong> {safeData.paymentDetails.accountName}</p>}
-                            {safeData.paymentDetails.accountNumber && <p><strong>Account No:</strong> {safeData.paymentDetails.accountNumber}</p>}
-                            {safeData.paymentDetails.paymentMethod && <p><strong>Method:</strong> {safeData.paymentDetails.paymentMethod}</p>}
+                            {safeData.paymentDetails.bankName && <p><strong>Bank:</strong> <span className="font-bold">{safeData.paymentDetails.bankName}</span></p>}
+                            {safeData.paymentDetails.accountName && <p><strong>Account Name:</strong> <span className="font-bold">{safeData.paymentDetails.accountName}</span></p>}
+                            {safeData.paymentDetails.accountNumber && <p><strong>Account No:</strong> <span className="font-bold">{safeData.paymentDetails.accountNumber}</span></p>}
+                            {safeData.paymentDetails.paymentMethod && <p><strong>Method:</strong> <span className="font-bold">{safeData.paymentDetails.paymentMethod}</span></p>}
                         </div>
                         </>
                     )}
