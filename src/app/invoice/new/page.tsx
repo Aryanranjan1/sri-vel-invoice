@@ -24,7 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { CalendarIcon, Download, Plus, Trash2 } from 'lucide-react';
+import { CalendarIcon, Download, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { InvoicePreview, type InvoiceFormData } from '@/components/invoice-preview';
 import { useRef } from 'react';
@@ -32,6 +32,8 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { AIInvoiceExtractor } from '@/components/ai-invoice-extractor';
 
 
 const lineItemSchema = z.object({
@@ -57,7 +59,7 @@ const invoiceFormSchema = z.object({
   template: z.string().optional().default('modern'),
 });
 
-type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
+export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
 
 export default function NewInvoicePage() {
     const { toast } = useToast();
@@ -167,6 +169,19 @@ export default function NewInvoicePage() {
                 </DropdownMenu>
             </div>
           </div>
+          <Accordion type="single" collapsible className="w-full mb-8">
+            <AccordionItem value="ai-extractor">
+              <AccordionTrigger>
+                <span className="flex items-center gap-2 text-lg font-semibold">
+                    <Sparkles className="text-accent" /> AI Assistant
+                </span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <AIInvoiceExtractor form={form} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
           <Form {...form}>
             <form className="space-y-8">
                <FormField
