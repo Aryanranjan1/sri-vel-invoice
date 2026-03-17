@@ -41,13 +41,13 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
 
     return (
         <Card ref={ref} className={cn(
-            "w-full max-w-2xl mx-auto my-8 print:shadow-none print:border-none print:my-0 bg-card aspect-[210/297] text-sm",
+            "w-full max-w-2xl mx-auto my-8 print:shadow-none print:border-none print:my-0 bg-card aspect-[210/297] text-sm flex flex-col",
             template === 'classic' && 'font-serif',
             template === 'minimal' && 'border-none shadow-none',
         )}>
             <CardHeader className={cn(
-                "flex flex-row justify-between items-start p-8",
-                template === 'classic' && "border-b-2 border-gray-800 pb-8 dark:border-gray-300"
+                "flex flex-row justify-between items-start p-6",
+                template === 'classic' && "border-b-2 border-gray-800 pb-6 dark:border-gray-300"
             )}>
                 <div>
                     <h1 className={cn(
@@ -66,7 +66,7 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
                     <p className="text-muted-foreground text-xs">{safeData.fromEmail}</p>
                 </div>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="p-6 flex-grow">
                 <Separator className={cn("my-4", template === 'minimal' && 'hidden', template === 'classic' && 'border-gray-800 dark:border-gray-300')} />
                 <div className="grid grid-cols-2 gap-8 mb-8">
                     <div>
@@ -142,7 +142,7 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
                 )}
 
             </CardContent>
-            <CardFooter className="p-8">
+            <CardFooter className="p-6">
                  <p className="text-xs text-muted-foreground w-full text-center">Thank you for your business!</p>
             </CardFooter>
         </Card>
