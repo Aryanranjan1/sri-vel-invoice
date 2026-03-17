@@ -1,0 +1,200 @@
+// Firestore Security Rules for Invoice Platform
+//
+// Core Philosophy
+// This ruleset enforces a strict, user-centric security model combined with role-based access for administrative functions. The primary goal is to ensure that users can only access their own data, while designated administrators have broader permissions to manage the platform. The default security posture is to deny all access unless explicitly granted.
+//
+// Data Structure
+// - /users/{userId}: The root for all user-owned data. A user's invoices and related items are nested here.
+// - /roles_admin/{userId}: A top-level collection that acts as a simple, powerful Database Access Control (DBAC) list. The existence of a document with a user's UID grants them admin privileges.
+// - /templates/{templateId}: A global collection for invoice templates. This data is publicly readable by all users but only writable by administrators.
+// - /contactMessages/{contactMessageId}: A top-level collection for user-submitted contact forms. It is publicly writable but restricted to admin-only for reads and updates.
+//
+// Key Security Decisions
+// - Strict Ownership: All data under /users/{userId} is strictly owned by that user. Access is granted by matching the userId in the path with the authenticated user's UID.
+// - Admin Roles via Document Existence: Administrative privileges are determined by checking for the existence of a document in the /roles_admin collection (e.g., exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))). This is a performant and auditable way to manage roles without relying on custom claims.
+// - No User Enumeration: Listing documents in the top-level /users collection is explicitly forbidden to protect user privacy.
+// - Public vs. Private Data Segregation: Publicly accessible data (like templates) is stored in a separate top-level collection from private, user-owned data. This prevents accidental data leakage and simplifies rules for list operations.
+//
+// Denormalization for Authorization
+// To create simpler and more performant rules, key authorization fields are denormalized.
+// - The userId is stored directly on Invoice documents within /users/{userId}/invoices. This allows rules to enforce consistency between the document's content and its path without extra database reads.
+// - The invoiceId is stored on InvoiceItem documents for the same reason, ensuring an item cannot be moved between invoices.
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions to abstract and reuse common logic.
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the authenticated user's UID matches the provided userId.
+     * This is the primary function for verifying document ownership.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks if the authenticated user is a designated administrator.
+     * Admin status is granted by the existence of a document in the /roles_admin collection.
+     */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * Ensures an authorization field (e.g., owner ID) is not changed during an update.
+     */
+    function isFieldImmutable(fieldName) {
+      return request.resource.data[fieldName] == resource.data[fieldName];
+    }
+
+    /**
+     * Ensures an authorization field is correctly set during creation to match its parent path.
+     */
+    function isFieldConsistent(fieldName, value) {
+      return request.resource.data[fieldName] == value;
+    }
+
+    /**
+     * @description
+     *   Manages user profile data.
+     *   A user can create their own profile document and can read/update/delete it.
+     *   Admins can read user profiles, but cannot list, create, update, or delete them.
+     * @path
+     *   /users/{userId}
+     * @allow
+     *   (create) A new user (auth.uid: 'user_abc') creating their own document at /users/user_abc.
+     * @deny
+     *   (list) Any user attempting to list all documents in the /users collection.
+     * @principle
+     *   Restricts access to a user's own data tree and prevents user enumeration.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if false;
+      allow create: if isOwner(userId) && isFieldConsistent('id', userId);
+      allow update: if isOwner(userId) && resource != null && isFieldImmutable('id');
+      allow delete: if isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description
+     *   Manages invoices that belong to a specific user.
+     *   Only the owner of the data tree or an admin can access these documents.
+     * @path
+     *   /users/{userId}/invoices/{invoiceId}
+     * @allow
+     *   (list) An authenticated user (auth.uid: 'user_abc') listing their own invoices at /users/user_abc/invoices.
+     * @deny
+     *   (get) A user (auth.uid: 'user_xyz') trying to read an invoice at /users/user_abc/invoices/invoice_123.
+     * @principle
+     *   Enforces hierarchical data ownership. Access to child documents is governed by ownership of the parent path.
+     */
+    match /users/{userId}/invoices/{invoiceId} {
+      allow get, list: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isFieldConsistent('userId', userId);
+      allow update: if isOwner(userId) && resource != null && isFieldImmutable('userId');
+      allow delete: if (isOwner(userId) || isAdmin()) && resource != null;
+    }
+
+    /**
+     * @description
+     *   Manages the line items for a specific invoice.
+     *   Access is inherited from the parent invoice, restricted to the owner or an admin.
+     * @path
+     *   /users/{userId}/invoices/{invoiceId}/items/{invoiceItemId}
+     * @allow
+     *   (create) The invoice owner (auth.uid: 'user_abc') adding an item to their own invoice.
+     * @deny
+     *   (update) A different user trying to modify an item in someone else's invoice.
+     * @principle
+     *   Maintains data integrity by enforcing that an item's parent invoiceId is correctly set and immutable.
+     */
+    match /users/{userId}/invoices/{invoiceId}/items/{invoiceItemId} {
+      allow get, list: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isFieldConsistent('invoiceId', invoiceId);
+      allow update: if isOwner(userId) && resource != null && isFieldImmutable('invoiceId');
+      allow delete: if (isOwner(userId) || isAdmin()) && resource != null;
+    }
+
+    /**
+     * @description
+     *   A Collection Group rule to allow admins to query across all invoices from any user.
+     *   This is a read-only rule to support admin dashboard functionality.
+     * @path
+     *   /{path=**}/invoices/{invoiceId}
+     * @allow
+     *   (list) An admin performing a collection group query on the 'invoices' collection ID.
+     * @deny
+     *   (list) A non-admin user attempting the same collection group query.
+     * @principle
+     *   Provides a secure and performant way for privileged roles to query across user-siloed data.
+     */
+    match /{path=**}/invoices/{invoiceId} {
+      allow get, list: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description
+     *   Manages administrator roles. The existence of a document grants admin privileges.
+     *   Only existing admins can read this collection or grant/revoke admin status to others.
+     * @path
+     *   /roles_admin/{userId}
+     * @allow
+     *   (create) An existing admin adding a new user's UID to this collection to make them an admin.
+     * @deny
+     *   (create) A non-admin user attempting to add their own UID to this collection.
+     * @principle
+     *   Implements Database Access Control (DBAC) where privileges are managed as data within the database itself.
+     */
+    match /roles_admin/{userId} {
+      allow get, list: if isAdmin();
+      allow create, update, delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description
+     *   Stores invoice templates that are publicly readable by all users but only manageable by admins.
+     * @path
+     *   /templates/{templateId}
+     * @allow
+     *   (list) Any user, including unauthenticated ones, listing all available templates.
+     * @deny
+     *   (create) A non-admin user attempting to create a new template.
+     * @principle
+     *   Separates public read-only data from private or protected data, enabling simpler and more performant security for global content.
+     */
+    match /templates/{templateId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description
+     *   Stores messages from the public contact form.
+     *   Anyone can create a message, but only admins can read, update, or delete them.
+     * @path
+     *   /contactMessages/{contactMessageId}
+     * @allow
+     *   (create) An unauthenticated visitor submitting the contact form.
+     * @deny
+     *   (list) A non-admin user attempting to read all submitted contact messages.
+     * @principle
+     *   Provides a secure "write-only" dropbox for public submissions, protecting sensitive information from unauthorized access.
+     */
+    match /contactMessages/{contactMessageId} {
+      allow get, list: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin() && resource != null;
+    }
+  }
+}

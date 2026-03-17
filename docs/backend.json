@@ -1,0 +1,433 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the Invoice Platform, managed by Supabase Auth. Primarily used for linking invoices to an authenticated user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user account was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user account was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "createdAt"
+      ]
+    },
+    "Invoice": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Invoice",
+      "type": "object",
+      "description": "Represents a generated or saved invoice, detailing client information, items, calculations, and linked to a user (optionally) and a template.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Invoice entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who owns this invoice. Nullable for invoices created by logged-out users. (Relationship: User 1:N Invoice)"
+        },
+        "templateId": {
+          "type": "string",
+          "description": "Reference to the Template used for this invoice's layout and styling. (Relationship: Template 1:N Invoice)"
+        },
+        "invoiceNumber": {
+          "type": "string",
+          "description": "A unique identifier or reference number for the invoice, often sequential."
+        },
+        "clientName": {
+          "type": "string",
+          "description": "The full name of the client to whom the invoice is issued."
+        },
+        "clientEmail": {
+          "type": "string",
+          "description": "The email address of the client.",
+          "format": "email"
+        },
+        "clientAddress": {
+          "type": "string",
+          "description": "The full mailing address of the client."
+        },
+        "clientPhone": {
+          "type": "string",
+          "description": "The phone number of the client."
+        },
+        "issuerName": {
+          "type": "string",
+          "description": "The name of the individual or company issuing the invoice."
+        },
+        "issuerAddress": {
+          "type": "string",
+          "description": "The mailing address of the individual or company issuing the invoice."
+        },
+        "issuerEmail": {
+          "type": "string",
+          "description": "The email address of the individual or company issuing the invoice.",
+          "format": "email"
+        },
+        "issuerPhone": {
+          "type": "string",
+          "description": "The phone number of the individual or company issuing the invoice."
+        },
+        "logoUrl": {
+          "type": "string",
+          "description": "URL to the uploaded logo displayed on the invoice.",
+          "format": "uri"
+        },
+        "issueDate": {
+          "type": "string",
+          "description": "The date the invoice was issued.",
+          "format": "date"
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "The date by which the invoice payment is due.",
+          "format": "date"
+        },
+        "subtotalAmount": {
+          "type": "number",
+          "description": "The sum of all invoice item totals before tax and discount."
+        },
+        "taxRate": {
+          "type": "number",
+          "description": "The percentage tax rate applied to the invoice (e.g., 0.05 for 5%)."
+        },
+        "taxAmount": {
+          "type": "number",
+          "description": "The calculated tax amount applied to the invoice."
+        },
+        "discountRate": {
+          "type": "number",
+          "description": "The percentage discount rate applied to the invoice (e.g., 0.10 for 10%)."
+        },
+        "discountAmount": {
+          "type": "number",
+          "description": "The calculated discount amount applied to the invoice."
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "The final total amount due for the invoice after all calculations."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes or terms included on the invoice."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the invoice (e.g., 'draft', 'sent', 'paid', 'overdue')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the invoice record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the invoice record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "templateId",
+        "invoiceNumber",
+        "clientName",
+        "issuerName",
+        "issueDate",
+        "dueDate",
+        "subtotalAmount",
+        "taxRate",
+        "taxAmount",
+        "discountRate",
+        "discountAmount",
+        "totalAmount",
+        "status",
+        "createdAt"
+      ]
+    },
+    "InvoiceItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "InvoiceItem",
+      "type": "object",
+      "description": "Represents a single line item within an invoice, detailing the service or product provided.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the InvoiceItem entity."
+        },
+        "invoiceId": {
+          "type": "string",
+          "description": "Reference to the Invoice this item belongs to. (Relationship: Invoice 1:N InvoiceItem)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name or title of the item or service."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the item or service."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The quantity of the item or service."
+        },
+        "unitPrice": {
+          "type": "number",
+          "description": "The price per unit of the item or service."
+        },
+        "total": {
+          "type": "number",
+          "description": "The total price for this item (quantity * unitPrice)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the invoice item was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the invoice item was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "invoiceId",
+        "name",
+        "quantity",
+        "unitPrice",
+        "total",
+        "createdAt"
+      ]
+    },
+    "Template": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Template",
+      "type": "object",
+      "description": "Defines the visual layout, typography, colors, and structure for invoices. Managed by administrators.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Template entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "A unique, human-readable name for the template (e.g., 'Modern Blue', 'Classic Grey')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the template's style or purpose."
+        },
+        "config": {
+          "type": "string",
+          "description": "A JSON object storing the configuration details for the template's layout, typography, colors, and table structure."
+        },
+        "isDefault": {
+          "type": "boolean",
+          "description": "Indicates if this template is the default option for new invoices."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the template was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the template was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "config",
+        "createdAt"
+      ]
+    },
+    "ContactMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ContactMessage",
+      "type": "object",
+      "description": "Stores messages submitted by users through the contact form, for administrative review and response.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ContactMessage entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the person who sent the message."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the sender, used for replies.",
+          "format": "email"
+        },
+        "message": {
+          "type": "string",
+          "description": "The content of the message sent by the user."
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Indicates whether the administrative team has viewed the message."
+        },
+        "repliedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when a reply was sent to this contact message.",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the contact message was submitted.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "message",
+        "isRead",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information, where 'userId' is the Firebase Authentication UID. Access is restricted to the user themselves and administrators. This path forms the root for user-owned data.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, corresponding to Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "A collection used for Database Access Control (DBAC) to define administrative roles. The mere existence of a document at this path for a given 'userId' grants administrative privileges. This design avoids custom claims and uses 'Existence over Content'.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who holds an administrative role."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/invoices/{invoiceId}",
+        "definition": {
+          "entityName": "Invoice",
+          "schema": {
+            "$ref": "#/backend/entities/Invoice"
+          },
+          "description": "Stores individual invoices created and saved by a logged-in user. The 'userId' in the path ensures direct ownership. The document also includes a 'userId' field (denormalized owner ID) for robust authorization independence and efficient querying. Access is restricted to the invoice owner and administrators.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this invoice, corresponding to Firebase Authentication UID."
+            },
+            {
+              "name": "invoiceId",
+              "description": "The unique identifier for the invoice document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/invoices/{invoiceId}/items/{invoiceItemId}",
+        "definition": {
+          "entityName": "InvoiceItem",
+          "schema": {
+            "$ref": "#/backend/entities/InvoiceItem"
+          },
+          "description": "Stores line items for a specific invoice. Access is restricted to the owner of the parent invoice. The document includes denormalized 'userId' (owner of the invoice) and 'invoiceId' for authorization independence, eliminating the need to read the parent invoice document in security rules.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns the parent invoice, corresponding to Firebase Authentication UID."
+            },
+            {
+              "name": "invoiceId",
+              "description": "The unique identifier of the parent invoice."
+            },
+            {
+              "name": "invoiceItemId",
+              "description": "The unique identifier for the individual invoice item document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/templates/{templateId}",
+        "definition": {
+          "entityName": "Template",
+          "schema": {
+            "$ref": "#/backend/entities/Template"
+          },
+          "description": "Stores predefined invoice templates, defining layouts and styles. These templates are globally readable by all users (logged-in or out) for selection, but can only be created, updated, or deleted by administrators.",
+          "params": [
+            {
+              "name": "templateId",
+              "description": "The unique identifier for the invoice template document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/contactMessages/{contactMessageId}",
+        "definition": {
+          "entityName": "ContactMessage",
+          "schema": {
+            "$ref": "#/backend/entities/ContactMessage"
+          },
+          "description": "Stores messages submitted through the contact form. Unauthenticated and authenticated users can create messages. Only administrators can read and update these messages (e.g., mark as read, note a reply). This collection is authorization independent.",
+          "params": [
+            {
+              "name": "contactMessageId",
+              "description": "The unique identifier for the contact message document."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure for the Invoice Platform prioritizes security, scalability, and debuggability by strictly adhering to the core design principles, especially Authorization Independence and QAPs (Queryable Access Patterns). The design leverages hierarchical collections for user-owned data and separates global/admin-managed data into top-level collections.\n\n**Authorization Independence (CRITICAL):**\n\n1.  **User-Owned Data (`/users/{userId}/invoices/{invoiceId}` and `/users/{userId}/invoices/{invoiceId}/items/{invoiceItemId}`):** Access to an invoice or an invoice item is determined by the `userId` in the document path. For an authenticated user (`request.auth.uid`), their access is directly tied to paths containing their UID. To prevent `get()` calls in security rules, the `InvoiceItem` document explicitly includes the `userId` of the invoice owner (denormalized from its parent `Invoice`). This allows a rule on an `InvoiceItem` to verify `request.auth.uid == userId` and `resource.data.userId == userId` without needing to read the parent `Invoice` document. The `Invoice` document itself also contains a `userId` field, ensuring internal consistency and enabling efficient queries.\n2.  **Global Roles (`/roles_admin/{userId}`):** Administrative status is determined by the *existence* of a document at `/roles_admin/{request.auth.uid}`. This is a sanctioned `get()` operation only at the root level of a dedicated role collection, making admin checks atomic and highly performant without complex hierarchical dependencies.\n3.  **Global Data (`/templates/{templateId}`, `/contactMessages/{contactMessageId}`):** These collections are not user-owned in a 1:1 sense. `Templates` are publicly readable but admin-writeable. `ContactMessages` are publicly createable but admin-readable/writeable. Their security rules do not depend on data from other collections, making them authorization independent.\n\n**QAPs (Rules are not Filters):**\n\n1.  **User Invoices (`/users/{userId}/invoices`):** Logged-in users can query and list *only their own* invoices by accessing their specific `/users/{userId}/invoices` subcollection. The security rules will enforce that `{userId}` in the path matches `request.auth.uid`, ensuring that no user can inadvertently or maliciously `list` other users' invoices. This design ensures QAPs for user dashboards.\n2.  **Invoice Items (`/users/{userId}/invoices/{invoiceId}/items`):** Similarly, invoice items are queried within the context of a specific user's invoice. The hierarchical path and denormalized `userId` field allow rules to efficiently check ownership, ensuring `list` operations for items are limited to the legitimate owner of the parent invoice.\n3.  **Templates (`/templates`):** All users (logged-in or out) can `list` and read available templates. This collection has a homogeneous security posture (globally readable) enabling simple `list` rules.\n4.  **Contact Messages (`/contactMessages`):** Only administrators can `list` and read contact messages, as enforced by the `isAdmin(request.auth.uid)` rule. This ensures that non-admin users cannot query this sensitive collection.\n5.  **Admin Global View of Invoices:** For administrators requiring a global view of all invoices (across all users), a Firestore Collection Group query on `invoices` can be used. The security rule for this collection group would grant `list` access only if `isAdmin(request.auth.uid)`. This allows admins to efficiently query all invoices without violating the principle that rules are not filters.\n\n**Structural Segregation and Access Modeling:**\n\n*   **Private Data:** User profiles are kept strictly private under `/users/{userId}`. User-specific invoices and their items are nested under this path, reinforcing path-based ownership.\n*   **Global Data:** `templates` and `contactMessages` are top-level collections because they have a global or admin-specific access pattern, distinct from individual user data.\n*   **DBAC:** Admin roles are explicitly managed via the `/roles_admin/{userId}` collection, providing a database-centric access control mechanism that is transparent and auditable."
+  }
+}
