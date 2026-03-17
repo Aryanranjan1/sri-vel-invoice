@@ -180,6 +180,7 @@ export function EditableInvoiceForm({ initialData, onUpdate, index }: EditableIn
                                 <SelectItem value="classic">Classic</SelectItem>
                                 <SelectItem value="minimal">Minimal</SelectItem>
                                 <SelectItem value="sri-vels">Sri Vels</SelectItem>
+                                <SelectItem value="editorial">Editorial</SelectItem>
                             </SelectContent>
                             </Select>
                             <FormMessage />

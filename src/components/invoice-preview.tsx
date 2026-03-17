@@ -9,17 +9,21 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { type InvoiceFormValues } from '@/types/invoice';
 import { SriVelsTemplate } from './sri-vels-template';
+import { EditorialTemplate } from './editorial-template';
 
 
 type InvoicePreviewProps = {
   data: InvoiceFormValues;
-  template?: 'modern' | 'classic' | 'minimal' | 'sri-vels';
+  template?: 'modern' | 'classic' | 'minimal' | 'sri-vels' | 'editorial';
 };
 
 export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewProps>(
   ({ data, template = 'modern' }, ref) => {
     if (template === 'sri-vels') {
         return <SriVelsTemplate data={data} ref={ref} />;
+    }
+    if (template === 'editorial') {
+        return <EditorialTemplate data={data} ref={ref} />;
     }
 
     const subtotal = data.items.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);

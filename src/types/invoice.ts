@@ -20,7 +20,7 @@ export const invoiceFormSchema = z.object({
   notes: z.string().optional(),
   taxRate: z.coerce.number().min(0).max(100).optional().default(0),
   discountRate: z.coerce.number().min(0).max(100).optional().default(0),
-  template: z.enum(['modern', 'classic', 'minimal', 'sri-vels']).optional().default('modern'),
+  template: z.enum(['modern', 'classic', 'minimal', 'sri-vels', 'editorial']).optional().default('modern'),
 });
 
 export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
