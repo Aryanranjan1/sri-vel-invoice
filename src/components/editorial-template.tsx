@@ -8,8 +8,7 @@ type EditorialTemplateProps = {
   data: InvoiceFormValues;
 };
 
-export const EditorialTemplate = React.forwardRef<HTMLDivElement, EditorialTemplateProps>(
-  ({ data }, ref) => {
+export const EditorialTemplate: React.FC<EditorialTemplateProps> = ({ data }) => {
     const subtotal = data.items.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
     const discountAmount = subtotal * ((Number(data.discountRate) || 0) / 100);
     const subtotalAfterDiscount = subtotal - discountAmount;
@@ -35,7 +34,7 @@ export const EditorialTemplate = React.forwardRef<HTMLDivElement, EditorialTempl
     };
     
     return (
-        <div ref={ref} className="bg-white text-black font-body text-[12px] leading-normal w-full min-h-full p-8 md:p-[20mm] flex flex-col print:p-0">
+        <div className="bg-white text-black font-body text-[12px] leading-normal w-full h-full p-6 flex flex-col print:p-0">
              <header className="flex justify-between items-end mb-[25px]">
                 <div className="max-w-[60%]">
                     <div className="text-base font-extrabold uppercase tracking-[-0.5px] mb-1.5">{safeData.fromName}</div>
@@ -133,7 +132,6 @@ export const EditorialTemplate = React.forwardRef<HTMLDivElement, EditorialTempl
             </footer>
         </div>
     );
-  }
-);
+};
 
 EditorialTemplate.displayName = "EditorialTemplate";

@@ -19,11 +19,21 @@ type InvoicePreviewProps = {
 
 export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewProps>(
   ({ data, template = 'modern' }, ref) => {
+    const cardWrapperClasses = "w-full mx-auto my-8 print:shadow-none print:border-none print:my-0 bg-card aspect-[210/297] flex flex-col overflow-hidden";
+
     if (template === 'sri-vels') {
-        return <SriVelsTemplate data={data} ref={ref} />;
+        return (
+            <Card ref={ref} className={cn(cardWrapperClasses)}>
+                <SriVelsTemplate data={data} />
+            </Card>
+        );
     }
     if (template === 'editorial') {
-        return <EditorialTemplate data={data} ref={ref} />;
+        return (
+            <Card ref={ref} className={cn(cardWrapperClasses)}>
+                <EditorialTemplate data={data} />
+            </Card>
+        );
     }
 
     const subtotal = data.items.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
