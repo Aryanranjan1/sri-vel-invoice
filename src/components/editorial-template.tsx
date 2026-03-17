@@ -125,7 +125,6 @@ export const EditorialTemplate: React.FC<EditorialTemplateProps> = ({ data }) =>
                  <div className="text-[11px]">
                     <div className="text-[9px] uppercase tracking-widest font-extrabold mb-2.5">Terms, Notes & Payment Instructions</div>
                     <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                        <strong className="text-black">Thank you for your business.</strong><br/>
                         {safeData.notes}
                     </div>
                 </div>

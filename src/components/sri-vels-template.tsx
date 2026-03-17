@@ -126,7 +126,6 @@ export const SriVelsTemplate: React.FC<SriVelsTemplateProps> = ({ data }) => {
 
             <div className="mt-auto pt-8 text-gray-800 text-[11px]">
                 <div className="text-[10px] uppercase font-bold tracking-widest text-gray-600 border-b border-gray-300 pb-1 mb-2">Notes & Payment Details</div>
-                <strong className="block mb-1 text-xs text-black font-semibold">Thank you for your business.</strong>
                 <p className="whitespace-pre-line">{safeData.notes}</p>
             </div>
         </div>
