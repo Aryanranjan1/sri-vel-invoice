@@ -22,14 +22,14 @@ export const SriVelsTemplate = React.forwardRef<HTMLDivElement, SriVelsTemplateP
 
     const safeData = {
         invoiceNumber: data.invoiceNumber || 'INV-000',
-        fromName: data.fromName || 'Sri Vels Catering & Transportation',
-        fromAddress: data.fromAddress || '6580 SEMPADAN KG DATO MANSU\nGPASIR RASAH SEREMBAN\n70300 SEREMBAN, NEGERI SEMBILAN',
-        toName: data.toName || '[Customer Name]',
-        toAddress: data.toAddress || '[Customer Address]',
+        fromName: data.fromName || 'Your Company',
+        fromAddress: data.fromAddress || '123 Main St\nAnytown, USA',
+        toName: data.toName || 'Client Company',
+        toAddress: data.toAddress || '456 Client Ave\nClient City, USA',
         invoiceDate: data.invoiceDate || new Date(),
         dueDate: data.dueDate || new Date(),
-        items: data.items.length > 1 || (data.items.length === 1 && data.items[0].description) ? data.items : [{ description: 'Catering Lunch (100 Pax)', quantity: 100, price: 7.20 }],
-        notes: data.notes || 'Payment due within 7 days. Please use the invoice number as the payment reference.',
+        items: data.items && data.items.length > 0 && data.items.some(i => i.description) ? data.items : [{ description: 'Example Service or Product', quantity: 1, price: 100.00 }],
+        notes: data.notes || 'Thank you for your business. Payment is due within 30 days.',
         taxRate: Number(data.taxRate) || 0,
         discountRate: Number(data.discountRate) || 0,
     };
@@ -39,9 +39,6 @@ export const SriVelsTemplate = React.forwardRef<HTMLDivElement, SriVelsTemplateP
             <header className="flex justify-between items-start mb-10 pb-6 border-b-2 border-black">
                 <div className="flex-1">
                     <div className="text-lg font-bold uppercase tracking-wide">{safeData.fromName}</div>
-                    {safeData.fromName === 'Sri Vels Catering & Transportation' && 
-                        <span className="text-[11px] text-gray-700 font-semibold block mb-3">Registration No (SSM): 202503053810 (JR0174329-K)</span>
-                    }
                     <div className="text-xs text-gray-800 whitespace-pre-line">
                         {safeData.fromAddress}
                     </div>
@@ -128,19 +125,10 @@ export const SriVelsTemplate = React.forwardRef<HTMLDivElement, SriVelsTemplateP
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-10 mt-auto pt-8">
-                <div className="text-[11px]">
-                     <div className="text-[10px] uppercase font-bold tracking-widest text-gray-600 border-b border-gray-300 pb-1 mb-2">Payment Details</div>
-                    <p><span className="text-gray-600 inline-block w-28">Bank Name:</span> <strong className="font-semibold">MAYBANK</strong></p>
-                    <p><span className="text-gray-600 inline-block w-28">Account Name:</span> <strong className="font-semibold">SRI VELS CATERING</strong></p>
-                    <p><span className="text-gray-600 inline-block w-28">Account Number:</span> <strong className="font-semibold">555015029067</strong></p>
-                    <p><span className="text-gray-600 inline-block w-28">Payment Method:</span> Bank Transfer</p>
-                </div>
-                <div className="text-[11px] text-gray-800">
-                    <div className="text-[10px] uppercase font-bold tracking-widest text-gray-600 border-b border-gray-300 pb-1 mb-2">Notes</div>
-                    <strong className="block mb-1 text-xs text-black font-semibold">Thank you for your business.</strong>
-                    <p>{safeData.notes}</p>
-                </div>
+            <div className="mt-auto pt-8 text-gray-800 text-[11px]">
+                <div className="text-[10px] uppercase font-bold tracking-widest text-gray-600 border-b border-gray-300 pb-1 mb-2">Notes & Payment Details</div>
+                <strong className="block mb-1 text-xs text-black font-semibold">Thank you for your business.</strong>
+                <p className="whitespace-pre-line">{safeData.notes}</p>
             </div>
         </div>
     );

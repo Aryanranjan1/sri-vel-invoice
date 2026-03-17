@@ -22,14 +22,14 @@ export const EditorialTemplate = React.forwardRef<HTMLDivElement, EditorialTempl
 
     const safeData = {
         invoiceNumber: data.invoiceNumber || 'INV-001',
-        fromName: data.fromName || 'Sri Vels Catering & Transportation',
-        fromAddress: data.fromAddress || 'Reg No (SSM): 202503053810 (JR0174329-K)\n6580 Sempadan KG Dato Mansu, Gpasir Rasah Seremban\n70300 Seremban, Negeri Sembilan',
-        toName: data.toName || '[Customer Name]',
-        toAddress: data.toAddress || '[Company Name]\n[Customer Address]\n[Contact Details]',
+        fromName: data.fromName || 'Your Company',
+        fromAddress: data.fromAddress || 'Company Reg. No. 123456-X\n123 Main Street, Suite 4B\nAnytown, ST 12345',
+        toName: data.toName || 'Client Name',
+        toAddress: data.toAddress || 'Client Company Name\n789 Client Avenue\nMetropolis, ST 54321',
         invoiceDate: data.invoiceDate || new Date(),
         dueDate: data.dueDate || new Date(),
-        items: data.items.length > 0 && data.items.some(i => i.description) ? data.items : [{ description: 'Catering Lunch (100 Pax)', quantity: 100, price: 7.20 }],
-        notes: data.notes || `Payment is strictly due within 7 days of the invoice date. Please reference invoice number ${data.invoiceNumber || 'INV-001'} when making your transfer.`,
+        items: data.items.length > 0 && data.items.some(i => i.description) ? data.items : [{ description: 'Example Service or Product', quantity: 1, price: 150.00 }],
+        notes: data.notes || 'Thank you for your business. Payment is due within 30 days.',
         taxRate: Number(data.taxRate) || 0,
         discountRate: Number(data.discountRate) || 0,
     };
@@ -122,29 +122,10 @@ export const EditorialTemplate = React.forwardRef<HTMLDivElement, EditorialTempl
                 </div>
             </div>
 
-            <footer className="grid grid-cols-2 gap-12 mt-auto pt-[30px] border-t-2 border-black">
-                <div className="text-[11px]">
-                    <div className="text-[9px] uppercase tracking-widest font-extrabold mb-2.5">Payment Instructions</div>
-                    <div className="flex mb-1.5">
-                        <span className="w-[120px] text-gray-600">Bank Name</span>
-                        <span className="font-semibold">MAYBANK</span>
-                    </div>
-                    <div className="flex mb-1.5">
-                        <span className="w-[120px] text-gray-600">Account Name</span>
-                        <span className="font-semibold">SRI VELS CATERING</span>
-                    </div>
-                    <div className="flex mb-1.5">
-                        <span className="w-[120px] text-gray-600">Account No.</span>
-                        <span className="font-semibold">555015029067</span>
-                    </div>
-                     <div className="flex">
-                        <span className="w-[120px] text-gray-600">Method</span>
-                        <span className="font-semibold">Bank Transfer</span>
-                    </div>
-                </div>
+            <footer className="mt-auto pt-[30px] border-t-2 border-black">
                  <div className="text-[11px]">
-                    <div className="text-[9px] uppercase tracking-widest font-extrabold mb-2.5">Terms & Notes</div>
-                    <div className="text-gray-700 leading-relaxed">
+                    <div className="text-[9px] uppercase tracking-widest font-extrabold mb-2.5">Terms, Notes & Payment Instructions</div>
+                    <div className="text-gray-700 leading-relaxed whitespace-pre-line">
                         <strong className="text-black">Thank you for your business.</strong><br/>
                         {safeData.notes}
                     </div>
