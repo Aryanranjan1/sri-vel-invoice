@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview An AI-powered invoice data extraction engine.
+ * @fileOverview An AI-powered invoice data extraction engine for a professional invoice generation system.
  *
  * - extractInvoiceData - A function that converts messy, unstructured user input into structured invoice data.
  * - ExtractInvoiceDataInput - The input type for the extractInvoiceData function.
@@ -16,23 +16,24 @@ const ExtractInvoiceDataInputSchema = z.object({
 export type ExtractInvoiceDataInput = z.infer<typeof ExtractInvoiceDataInputSchema>;
 
 const InvoiceItemSchema = z.object({
-    name: z.string().describe('The name or description of the line item.'),
+    name: z.string().describe('The name or description of the line item. Keep it concise for A4 formatting.'),
     quantity: z.number().describe('The quantity of the item. Defaults to 1 if not specified.'),
     price: z.number().describe('The price per unit of the item. Defaults to 0 if not specified.'),
 });
 
 const InvoiceSchema = z.object({
     date: z.string().describe('The date of the invoice, formatted as YYYY-MM-DD.').optional(),
-    title: z.string().describe('A title for the invoice, like "Lunch" or "Dinner".').optional(),
+    title: z.string().describe('A title for the invoice, like "Lunch" or "Event Type".').optional(),
     clientName: z.string().describe('The name of the client or customer.').optional(),
+    currency: z.string().describe('The currency code for the invoice amounts. Should be "MYR".').optional(),
     items: z.array(InvoiceItemSchema).describe('An array of line items on the invoice.'),
-    total: z.number().describe('The final total amount of the invoice.').optional(),
-    notes: z.string().describe('Any additional notes or raw text from the invoice.').optional(),
+    total: z.number().describe('The final total amount of the invoice, as a numeric value.').optional(),
+    notes: z.string().describe('Any additional notes, raw text, or full menu details from the invoice.').optional(),
     missingFields: z.array(z.string()).describe('An array of strings indicating which critical fields were not found in the input.'),
 });
 
 const ExtractInvoiceDataOutputSchema = z.object({
-  invoices: z.array(InvoiceSchema),
+  invoices: z.array(InvoiceSchema).describe('An array of detected invoices.'),
 });
 export type ExtractInvoiceDataOutput = z.infer<typeof ExtractInvoiceDataOutputSchema>;
 
@@ -45,63 +46,87 @@ const extractionPrompt = ai.definePrompt({
   name: 'extractInvoiceDataPrompt',
   input: {schema: ExtractInvoiceDataInputSchema},
   output: {schema: ExtractInvoiceDataOutputSchema},
-  prompt: `You are an advanced invoice data extraction engine.
-
-Your task is to convert messy, unstructured user input into structured invoice data.
+  prompt: `You are an advanced invoice data extraction engine for a professional invoice generation system.
+Your task is to convert messy, unstructured user input into structured invoice data suitable for generating clean A4-sized invoices.
 
 ---
 
-## CORE RULES
+## CORE RULES (MANDATORY)
 
-* Output ONLY valid JSON that conforms to the output schema.
-* Do NOT include any explanation or extra text.
-* Do NOT wrap the JSON in markdown.
-* Always return an "invoices" array, even if the input seems empty.
-* Never return an empty or undefined output.
+*   Output ONLY valid JSON that conforms to the output schema.
+*   Do NOT include any explanation or extra text.
+*   Do NOT wrap the JSON in markdown.
+*   Always return an "invoices" array, even if the input is empty.
+*   Never return an empty or undefined output.
 
 ---
 
 ## OBJECTIVE
 
-* Detect how many distinct invoices exist in the input text.
-* Split the input into multiple invoice blocks if necessary (e.g., based on spacing, dates, or repeated structures).
-* Extract structured data from each block.
+*   Detect how many distinct invoices exist in the input.
+*   Split the input into multiple invoice blocks if necessary (based on spacing, dates, or structure).
+*   Extract structured data from each block.
+*   Prepare the data to be suitable for clean A4 invoice rendering.
 
 ---
 
-## EXTRACTION LOGIC & SCHEMA
+## EXTRACTION LOGIC
 
-For each invoice detected, extract the following fields:
-
-*   **date**: string (Format as YYYY-MM-DD. For example, "24/3" or "March 24, 2024" should become "2024-03-24").
-*   **title**: string (A general title like "Lunch" or "Dinner" if present).
-*   **clientName**: string (The name of the person or company being invoiced, e.g., "PJ Temple").
-*   **items**: array of objects, where each object has:
-    *   **name**: string (The name of the menu item or service).
-    *   **quantity**: number (Default to 1 if not specified).
-    *   **price**: number (The price for a single unit. Default to 0 if no per-item price is found).
-*   **total**: number (The final total amount. Extract from patterns like "Tt$670" or "Total 600").
-*   **notes**: string (Include any additional text, comments, or the raw menu list if it provides context).
-*   **missingFields**: array of strings. Add the corresponding field name to this array if it's missing:
-    *   "clientName" if no client name is found.
-    *   "itemPricing" if no prices for any items are found.
-    *   "total" if no total amount is found.
-    *   "date" if no date is found.
+*   Each logical section should be treated as one invoice.
+*   Extract the following fields:
+    *   **date**: Normalize formats like "24/3" to a consistent format (e.g., YYYY-MM-DD).
+    *   **title**: Extract event types like "Lunch" or "Dinner".
+    *   **clientName**: The name of the person or company being invoiced (e.g., "PJ Temple").
+    *   **items**: If a menu list is provided, treat each entry as an item.
+    *   **total**: Extract from patterns like "Tt$670" or "Total 600".
+    *   **notes**: Include the full raw menu or any additional text for reference.
 
 ---
-## DEFAULTS
 
-* If quantity is not mentioned for an item, it is **1**.
-* If a price is not specified for an item, its price is **0**.
-* If a string field is not found, it should be an empty string "" or omitted.
+## CURRENCY RULE (STRICT)
 
----
-## IMPORTANT
-
-* Be aggressive and creative in parsing messy, inconsistent input. Your goal is to extract structure from chaos.
-* Do not fail if the formatting is weird. Always return your best attempt at a structured result.
+*   Always set the **currency** field to **"MYR"** (Malaysian Ringgit).
+*   Remove currency symbols like "$" or "Tt$" from all extracted numeric values (total, price).
+*   Convert all extracted totals and prices into numeric values only.
+    *   Example: "Tt$670" should result in \`"total": 670\`.
 
 ---
+
+## A4 STRUCTURE OPTIMIZATION
+
+Prepare data so it fits cleanly into an A4 invoice layout:
+
+*   Keep item names concise.
+*   Avoid duplicating large blocks of text in both items and notes.
+*   Move full menu details into the "notes" field if they are too long for a table row.
+*   Ensure the item list remains readable for a table format.
+
+---
+
+## MISSING FIELD DETECTION
+
+Add the corresponding field name to the "missingFields" array if:
+*   "clientName" is not found.
+*   "itemPricing" is not found (i.e., no prices for any items).
+*   "total" is not found.
+*   "date" is not found.
+
+---
+
+## DEFAULT VALUES
+
+*   **quantity**: Default to 1 if not specified.
+*   **price**: Default to 0 if an item price is not specified.
+*   **string fields**: Default to an empty string "" if not found.
+
+---
+
+## FINAL OUTPUT REQUIREMENT
+
+The JSON must be clean, structured, and directly usable for A4 PDF generation, multi-invoice rendering, and populating editable UI forms.
+
+---
+
 USER INPUT TO PROCESS:
 \`\`\`
 {{{unstructuredData}}}
