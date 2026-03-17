@@ -1,46 +1,27 @@
-
 'use client';
 
 import * as React from 'react';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 import { type InvoiceFormValues } from '@/types/invoice';
-import { SriVelsTemplate } from './sri-vels-template';
-import { EditorialTemplate } from './editorial-template';
-
 
 type InvoicePreviewProps = {
   data: InvoiceFormValues;
-  template?: 'modern' | 'classic' | 'minimal' | 'sri-vels' | 'editorial';
 };
 
 export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewProps>(
-  ({ data, template = 'modern' }, ref) => {
-    const cardWrapperClasses = "w-full mx-auto my-8 print:shadow-none print:border-none print:my-0 bg-card aspect-[210/297] flex flex-col overflow-hidden";
-
-    if (template === 'sri-vels') {
-        return (
-            <Card ref={ref} className={cn(cardWrapperClasses)}>
-                <SriVelsTemplate data={data} />
-            </Card>
-        );
-    }
-    if (template === 'editorial') {
-        return (
-            <Card ref={ref} className={cn(cardWrapperClasses)}>
-                <EditorialTemplate data={data} />
-            </Card>
-        );
-    }
-
+  ({ data }, ref) => {
+    
     const subtotal = data.items.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
     const discountAmount = subtotal * ((Number(data.discountRate) || 0) / 100);
     const subtotalAfterDiscount = subtotal - discountAmount;
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
+
+    const formatCurrency = (amount: number | string) => {
+        const num = Number(amount);
+        if (isNaN(num)) return amount;
+        return 'RM' + num.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
 
     const safeData = {
         ...data,
@@ -55,143 +36,110 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
         invoiceDate: data.invoiceDate || new Date(),
         dueDate: data.dueDate || new Date(),
         notes: data.notes || '',
-        items: data.items.length > 0 ? data.items : [{description: 'Example Item', quantity: 1, price: 100}],
+        items: data.items.length > 0 && data.items.some(i => i.description) 
+            ? data.items 
+            : [{description: 'Example Item', quantity: 1, price: 100}],
         taxRate: Number(data.taxRate) || 0,
         discountRate: Number(data.discountRate) || 0,
     };
-    
-    const formatPrice = (price: any) => {
-        const num = Number(price);
-        if (isNaN(num)) return price;
-        return `RM${num.toFixed(2)}`;
-    }
 
     return (
-        <Card ref={ref} className={cn(
-            "w-full mx-auto my-8 print:shadow-none print:border-none print:my-0 bg-card aspect-[210/297] text-sm flex flex-col",
-            template === 'classic' && 'font-serif',
-            template === 'minimal' && 'border-none shadow-none',
-        )}>
-            <CardHeader className={cn(
-                "flex flex-row justify-between items-start p-6",
-                template === 'classic' && "border-b-2 border-gray-800 pb-6 dark:border-gray-300"
-            )}>
+        <div ref={ref} className="bg-card text-foreground font-body p-10 md:p-12 aspect-[210/297] flex flex-col text-[10px] md:text-xs">
+            {/* Header */}
+            <header className="flex justify-between items-start mb-16">
                 <div>
-                    <h1 className={cn(
-                        "text-2xl font-bold font-headline",
-                        template === 'classic' && "text-3xl",
-                        template === 'minimal' && "text-xl font-semibold",
-                    )}>Invoice</h1>
-                    <p className="text-muted-foreground">#{safeData.invoiceNumber}</p>
+                    <h2 className="font-semibold text-base md:text-lg mb-1">{safeData.fromName}</h2>
+                    <p className="text-muted-foreground whitespace-pre-line text-[0.9em]">{safeData.fromRegNo}</p>
+                    <p className="text-muted-foreground whitespace-pre-line text-[0.9em]">{safeData.fromAddress}</p>
+                    {safeData.fromEmail && <p className="text-muted-foreground text-[0.9em]">{safeData.fromEmail}</p>}
                 </div>
-                <div className={cn(
-                    "text-right",
-                    template === 'minimal' && 'hidden'
-                )}>
-                    <p className="font-bold text-base">{safeData.fromName}</p>
-                    {safeData.fromRegNo && <p className="text-muted-foreground text-xs">{safeData.fromRegNo}</p>}
-                    <p className="text-muted-foreground text-xs whitespace-pre-line">{safeData.fromAddress}</p>
-                    {safeData.fromEmail && <p className="text-muted-foreground text-xs">{safeData.fromEmail}</p>}
-                </div>
-            </CardHeader>
-            <CardContent className="p-6 flex-grow flex flex-col">
-                <Separator className={cn("my-4", template === 'minimal' && 'hidden', template === 'classic' && 'border-gray-800 dark:border-gray-300')} />
-                <div className="grid grid-cols-2 gap-8 mb-8">
-                    <div>
-                        <h3 className="font-semibold mb-2">Bill To:</h3>
-                        <p className="font-bold">{safeData.toName}</p>
-                        <p className="text-muted-foreground whitespace-pre-line">{safeData.toAddress}</p>
-                        {safeData.toEmail && <p className="text-muted-foreground">{safeData.toEmail}</p>}
-                    </div>
-                    <div className="text-right space-y-1">
-                        <p><strong>Invoice Date:</strong> {format(safeData.invoiceDate, 'PPP')}</p>
-                        <p><strong>Due Date:</strong> {format(safeData.dueDate, 'PPP')}</p>
+                <div className="text-right">
+                    <h1 className="font-light text-2xl md:text-3xl mb-4">Invoice</h1>
+                    <div className="grid grid-cols-[auto_auto] gap-x-4 gap-y-1 text-sm">
+                        <span className="text-muted-foreground">Invoice No.</span>
+                        <span className="font-medium">{safeData.invoiceNumber}</span>
+                        <span className="text-muted-foreground">Date</span>
+                        <span className="font-medium">{format(safeData.invoiceDate, 'dd MMM yyyy')}</span>
+                        <span className="text-muted-foreground">Due Date</span>
+                        <span className="font-medium">{format(safeData.dueDate, 'dd MMM yyyy')}</span>
                     </div>
                 </div>
+            </header>
 
-                <div className="flex-grow">
-                    <Table className={template === 'classic' ? 'border-y-2 border-gray-800 dark:border-gray-300' : ''}>
-                        <TableHeader>
-                            <TableRow className={cn(template === 'classic' && 'bg-gray-200 dark:bg-gray-700')}>
-                                <TableHead>Item</TableHead>
-                                <TableHead className="text-center w-[100px]">Quantity</TableHead>
-                                <TableHead className="text-right w-[120px]">Price</TableHead>
-                                <TableHead className="text-right w-[120px]">Total</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {safeData.items.map((item, index) => {
-                                const itemTotal = (Number(item.quantity) || 0) * (Number(item.price) || 0);
-                                const isNumeric = !isNaN(Number(item.quantity)) && !isNaN(Number(item.price));
-                                return (
-                                    <TableRow key={index} className="last:border-b-0">
-                                        <TableCell className="font-medium">{item.description || '...'}</TableCell>
-                                        <TableCell className="text-center">{item.quantity}</TableCell>
-                                        <TableCell className="text-right">{formatPrice(item.price)}</TableCell>
-                                        <TableCell className="text-right">{isNumeric ? `RM${itemTotal.toFixed(2)}` : '-'}</TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
+            {/* Billing */}
+            <section className="mb-12">
+                <h3 className="text-[0.8em] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Billed To</h3>
+                <p className="font-medium text-base">{safeData.toName}</p>
+                <p className="text-muted-foreground whitespace-pre-line">{safeData.toAddress}</p>
+                {safeData.toEmail && <p className="text-muted-foreground">{safeData.toEmail}</p>}
+            </section>
+
+            {/* Table */}
+            <div className="flex-grow">
+                <table className="w-full border-collapse">
+                    <thead>
+                        <tr>
+                            <th className="text-left pb-3 border-b-2 font-medium text-muted-foreground uppercase tracking-wider text-[0.8em]">Description</th>
+                            <th className="text-right pb-3 border-b-2 font-medium text-muted-foreground uppercase tracking-wider text-[0.8em] w-20">Qty</th>
+                            <th className="text-right pb-3 border-b-2 font-medium text-muted-foreground uppercase tracking-wider text-[0.8em] w-24">Unit Price</th>
+                            <th className="text-right pb-3 border-b-2 font-medium text-muted-foreground uppercase tracking-wider text-[0.8em] w-28">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {safeData.items.map((item, index) => {
+                            const itemTotal = (Number(item.quantity) || 0) * (Number(item.price) || 0);
+                            const isNumeric = !isNaN(Number(item.quantity)) && !isNaN(Number(item.price));
+                             return (
+                                <tr key={index}>
+                                    <td className="py-3 border-b font-medium">{item.description || '...'}</td>
+                                    <td className="py-3 border-b text-right text-muted-foreground">{item.quantity}</td>
+                                    <td className="py-3 border-b text-right text-muted-foreground">{formatCurrency(item.price)}</td>
+                                    <td className="py-3 border-b text-right font-medium">{isNumeric ? formatCurrency(itemTotal) : '-'}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Totals */}
+            <div className="mt-8 ml-auto w-full max-w-xs">
+                <div className="space-y-2 text-sm">
+                    <div className="flex justify-between text-muted-foreground"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
+                    {safeData.discountRate > 0 && <div className="flex justify-between text-muted-foreground"><span>Discount ({safeData.discountRate}%)</span><span>-{formatCurrency(discountAmount)}</span></div>}
+                    <div className="flex justify-between text-muted-foreground"><span>Tax ({safeData.taxRate}%)</span><span>{formatCurrency(taxAmount)}</span></div>
+                    <div className="border-t my-2"></div>
+                    <div className="flex justify-between font-semibold text-base"><span>Total Due</span><span>{formatCurrency(total)}</span></div>
                 </div>
-                
-                <div className="mt-auto pt-6">
-                    {safeData.notes && (
-                        <>
-                            <Separator className="my-6" />
-                            <div>
-                                <h3 className="font-semibold mb-2">Notes</h3>
-                                <p className="text-sm text-muted-foreground whitespace-pre-line">{safeData.notes}</p>
-                            </div>
-                        </>
-                    )}
-                    {safeData.paymentDetails && (safeData.paymentDetails.bankName || safeData.paymentDetails.accountName || safeData.paymentDetails.accountNumber) && (
-                        <>
-                            <Separator className="my-6" />
-                            <div>
-                                <h3 className="font-semibold mb-2">Payment Instructions</h3>
-                                <div className="text-sm text-muted-foreground space-y-1">
+            </div>
+
+            {/* Footer */}
+            <footer className="mt-16 pt-8 border-t text-muted-foreground text-[0.9em]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <div>
+                        {safeData.paymentDetails && (safeData.paymentDetails.bankName || safeData.paymentDetails.accountName) && (
+                           <>
+                                <h4 className="font-semibold text-foreground mb-2">Payment Details</h4>
+                                <div className="space-y-1">
                                     {safeData.paymentDetails.bankName && <p><strong>Bank:</strong> {safeData.paymentDetails.bankName}</p>}
                                     {safeData.paymentDetails.accountName && <p><strong>Account Name:</strong> {safeData.paymentDetails.accountName}</p>}
                                     {safeData.paymentDetails.accountNumber && <p><strong>Account No:</strong> {safeData.paymentDetails.accountNumber}</p>}
                                     {safeData.paymentDetails.paymentMethod && <p><strong>Method:</strong> {safeData.paymentDetails.paymentMethod}</p>}
                                 </div>
-                            </div>
-                        </>
-                    )}
-                    <Separator className="my-4" />
-
-                    <div className="flex justify-end">
-                        <div className="w-full max-w-xs space-y-2">
-                            <div className="flex justify-between">
-                                <span>Subtotal:</span>
-                                <span>RM{subtotal.toFixed(2)}</span>
-                            </div>
-                            {safeData.discountRate > 0 && (
-                                <div className="flex justify-between">
-                                    <span>Discount ({safeData.discountRate}%):</span>
-                                    <span className="text-red-500">-RM{discountAmount.toFixed(2)}</span>
-                                </div>
-                            )}
-                            <div className="flex justify-between">
-                                <span>Tax ({safeData.taxRate}%):</span>
-                                <span>RM{taxAmount.toFixed(2)}</span>
-                            </div>
-                            <Separator className="my-2" />
-                            <div className="flex justify-between font-bold text-lg">
-                                <span>Total:</span>
-                                <span>RM{total.toFixed(2)}</span>
-                            </div>
-                        </div>
+                           </>
+                        )}
+                    </div>
+                    <div>
+                        {safeData.notes && (
+                           <>
+                                <h4 className="font-semibold text-foreground mb-2">Terms & Notes</h4>
+                                <p className="whitespace-pre-line">{safeData.notes}</p>
+                           </>
+                        )}
                     </div>
                 </div>
-
-            </CardContent>
-            <CardFooter className="p-6 mt-auto">
-                 <p className="text-xs text-muted-foreground w-full text-center">Thank you for your business!</p>
-            </CardFooter>
-        </Card>
+            </footer>
+        </div>
     );
   }
 );
