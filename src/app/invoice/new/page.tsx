@@ -24,11 +24,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { CalendarIcon, Plus, Trash2 } from 'lucide-react';
+import { CalendarIcon, Download, Plus, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { InvoicePreview, type InvoiceFormData } from '@/components/invoice-preview';
-import { Separator } from '@/components/ui/separator';
+import { useRef } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 
 const lineItemSchema = z.object({
   description: z.string().min(1, 'Description is required.'),
@@ -50,12 +54,15 @@ const invoiceFormSchema = z.object({
   notes: z.string().optional(),
   taxRate: z.coerce.number().min(0).max(100).optional().default(0),
   discountRate: z.coerce.number().min(0).max(100).optional().default(0),
+  template: z.string().optional().default('modern'),
 });
 
 type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
 
 export default function NewInvoicePage() {
     const { toast } = useToast();
+    const invoicePreviewRef = useRef<HTMLDivElement>(null);
+
   const defaultValues: Partial<InvoiceFormValues> = {
     invoiceNumber: `INV-${String(Date.now()).slice(-6)}`,
     fromName: '',
@@ -70,6 +77,7 @@ export default function NewInvoicePage() {
     notes: 'Thank you for your business.',
     taxRate: 8, // Example tax
     discountRate: 0,
+    template: 'modern',
   };
 
   const form = useForm<InvoiceFormValues>({
@@ -83,28 +91,109 @@ export default function NewInvoicePage() {
     control: form.control,
   });
 
-  function onSubmit(data: InvoiceFormValues) {
-    toast({
-      title: 'Invoice Created (Simulated)',
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-  }
+  const handleDownload = async (format: 'pdf' | 'png') => {
+    if (!invoicePreviewRef.current) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not find the invoice preview to download.',
+        });
+        return;
+    }
+    
+    toast({ title: 'Preparing download...', description: `Your invoice is being generated as a ${format.toUpperCase()} file.` });
+
+    try {
+        const canvas = await html2canvas(invoicePreviewRef.current, {
+            scale: 2.5, // Higher scale for better quality
+            useCORS: true,
+            logging: false,
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+
+        if (format === 'png') {
+            const link = document.createElement('a');
+            link.download = `invoice-${form.getValues('invoiceNumber') || 'download'}.png`;
+            link.href = imgData;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else { // pdf
+            const pdf = new jsPDF({
+                orientation: 'p',
+                unit: 'px',
+                format: [canvas.width, canvas.height]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save(`invoice-${form.getValues('invoiceNumber') || 'download'}.pdf`);
+        }
+         toast({ title: 'Download Started!', description: `Your invoice has been downloaded.` });
+    } catch (error) {
+        console.error("Failed to download invoice:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Download Failed',
+            description: 'An unexpected error occurred while generating the file.',
+        });
+    }
+  };
   
   const watchedData = form.watch() as InvoiceFormData;
   const invoiceDate = form.watch('invoiceDate');
+  const watchedTemplate = form.watch('template');
 
   return (
     <div className="container mx-auto py-12 px-4 md:px-6">
        <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-12">
         <div>
-          <h1 className="text-3xl font-bold font-headline mb-8">Create Invoice</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+            <h1 className="text-3xl font-bold font-headline">Create Invoice</h1>
+            <div className="mt-4 sm:mt-0">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button>
+                            <Download className="mr-2" /> Download Invoice
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuItem onClick={() => handleDownload('pdf')}>
+                            Download as PDF
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDownload('png')}>
+                            Download as PNG
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+          </div>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              
+            <form className="space-y-8">
+               <FormField
+                control={form.control}
+                name="template"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Invoice Template</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a visual template for your invoice" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="modern">Modern</SelectItem>
+                        <SelectItem value="classic">Classic</SelectItem>
+                        <SelectItem value="minimal">Minimal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Choose the look and feel of your invoice. The preview will update instantly.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold border-b pb-2">From</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -405,17 +494,13 @@ export default function NewInvoicePage() {
                     </div>
                 </div>
               </div>
-
-              <div className="flex justify-end gap-2">
-                <Button type="submit">Save Invoice</Button>
-              </div>
             </form>
           </Form>
         </div>
         <div className="lg:sticky lg:top-24 lg:h-fit">
           <h2 className="text-xl font-semibold mb-4 text-center lg:text-left">Live Preview</h2>
           <div className="bg-secondary/30 p-4 rounded-lg">
-            <InvoicePreview data={watchedData} />
+            <InvoicePreview ref={invoicePreviewRef} data={watchedData} template={watchedTemplate} />
           </div>
         </div>
       </div>

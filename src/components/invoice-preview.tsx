@@ -1,9 +1,12 @@
+
 'use client';
 
+import * as React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 // This should match the form values type from the new invoice page
 export type InvoiceFormData = {
@@ -24,9 +27,16 @@ export type InvoiceFormData = {
   notes?: string;
   taxRate?: number;
   discountRate?: number;
+  template?: string;
 };
 
-export function InvoicePreview({ data }: { data: InvoiceFormData }) {
+type InvoicePreviewProps = {
+  data: InvoiceFormData;
+  template?: string;
+};
+
+export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewProps>(
+  ({ data, template = 'modern' }, ref) => {
     const subtotal = data.items.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
     const discountAmount = subtotal * ((Number(data.discountRate) || 0) / 100);
     const subtotalAfterDiscount = subtotal - discountAmount;
@@ -50,20 +60,34 @@ export function InvoicePreview({ data }: { data: InvoiceFormData }) {
     };
 
     return (
-        <Card className="w-full max-w-4xl mx-auto my-8 print:shadow-none print:border-none print:my-0">
-            <CardHeader className="flex flex-row justify-between items-start">
+        <Card ref={ref} className={cn(
+            "w-full max-w-4xl mx-auto my-8 print:shadow-none print:border-none print:my-0 bg-card",
+            template === 'classic' && 'font-serif',
+            template === 'minimal' && 'border-none shadow-none',
+        )}>
+            <CardHeader className={cn(
+                "flex flex-row justify-between items-start",
+                template === 'classic' && "border-b-2 border-gray-800 pb-8 dark:border-gray-300"
+            )}>
                 <div>
-                    <h1 className="text-3xl font-bold">Invoice</h1>
+                    <h1 className={cn(
+                        "text-3xl font-bold font-headline",
+                        template === 'classic' && "text-4xl",
+                        template === 'minimal' && "text-2xl font-semibold",
+                    )}>Invoice</h1>
                     <p className="text-muted-foreground">#{safeData.invoiceNumber}</p>
                 </div>
-                <div className="text-right">
+                <div className={cn(
+                    "text-right",
+                    template === 'minimal' && 'hidden'
+                )}>
                     <p className="font-bold text-lg">{safeData.fromName}</p>
                     <p className="text-muted-foreground">{safeData.fromAddress}</p>
                     <p className="text-muted-foreground">{safeData.fromEmail}</p>
                 </div>
             </CardHeader>
             <CardContent>
-                <Separator className="my-4" />
+                <Separator className={cn("my-4", template === 'minimal' && 'hidden', template === 'classic' && 'border-gray-800 dark:border-gray-300')} />
                 <div className="grid grid-cols-2 gap-8 mb-8">
                     <div>
                         <h3 className="font-semibold mb-2">Bill To:</h3>
@@ -77,9 +101,9 @@ export function InvoicePreview({ data }: { data: InvoiceFormData }) {
                     </div>
                 </div>
 
-                <Table>
+                <Table className={template === 'classic' ? 'border-y-2 border-gray-800 dark:border-gray-300' : ''}>
                     <TableHeader>
-                        <TableRow>
+                        <TableRow className={cn(template === 'classic' && 'bg-gray-200 dark:bg-gray-700')}>
                             <TableHead>Item</TableHead>
                             <TableHead className="text-center w-[100px]">Quantity</TableHead>
                             <TableHead className="text-right w-[120px]">Price</TableHead>
@@ -90,7 +114,7 @@ export function InvoicePreview({ data }: { data: InvoiceFormData }) {
                         {safeData.items.map((item, index) => {
                             const itemTotal = (Number(item.quantity) || 0) * (Number(item.price) || 0);
                             return (
-                                <TableRow key={index}>
+                                <TableRow key={index} className="last:border-b-0">
                                     <TableCell className="font-medium">{item.description || '...'}</TableCell>
                                     <TableCell className="text-center">{Number(item.quantity) || 0}</TableCell>
                                     <TableCell className="text-right">${(Number(item.price) || 0).toFixed(2)}</TableCell>
@@ -101,7 +125,7 @@ export function InvoicePreview({ data }: { data: InvoiceFormData }) {
                     </TableBody>
                 </Table>
                 
-                <Separator className="my-4" />
+                <Separator className={cn("my-4", template === 'classic' && 'border-gray-800 dark:border-gray-300')} />
 
                 <div className="flex justify-end">
                     <div className="w-full max-w-xs space-y-2">
@@ -143,4 +167,6 @@ export function InvoicePreview({ data }: { data: InvoiceFormData }) {
             </CardFooter>
         </Card>
     );
-}
+  }
+);
+InvoicePreview.displayName = "InvoicePreview";
