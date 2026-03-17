@@ -10,7 +10,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const ExtractInvoiceDataInputSchema = z.object({
+const ExtractInvoiceDataInputSchema = z.object({
   unstructuredData: z.string().describe('The raw, unstructured text to be parsed into invoice data.'),
 });
 export type ExtractInvoiceDataInput = z.infer<typeof ExtractInvoiceDataInputSchema>;
@@ -31,7 +31,7 @@ const InvoiceSchema = z.object({
     missingFields: z.array(z.string()).describe('An array of strings indicating which critical fields were not found in the input.'),
 });
 
-export const ExtractInvoiceDataOutputSchema = z.object({
+const ExtractInvoiceDataOutputSchema = z.object({
   invoices: z.array(InvoiceSchema),
 });
 export type ExtractInvoiceDataOutput = z.infer<typeof ExtractInvoiceDataOutputSchema>;
