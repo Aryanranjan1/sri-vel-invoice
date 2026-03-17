@@ -19,16 +19,24 @@ export const EditorialTemplate: React.FC<EditorialTemplateProps> = ({ data }) =>
         return 'RM ' + amount.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
+    const formatPrice = (price: any) => {
+        const num = Number(price);
+        if (isNaN(num)) return price;
+        return formatCurrency(num);
+    }
+
     const safeData = {
+        ...data,
         invoiceNumber: data.invoiceNumber || 'INV-001',
         fromName: data.fromName || 'Your Company',
-        fromAddress: data.fromAddress || 'Company Reg. No. 123456-X\n123 Main Street, Suite 4B\nAnytown, ST 12345',
+        fromRegNo: data.fromRegNo,
+        fromAddress: data.fromAddress || '123 Main Street, Suite 4B\nAnytown, ST 12345',
         toName: data.toName || 'Client Name',
         toAddress: data.toAddress || 'Client Company Name\n789 Client Avenue\nMetropolis, ST 54321',
         invoiceDate: data.invoiceDate || new Date(),
         dueDate: data.dueDate || new Date(),
-        items: data.items.length > 0 && data.items.some(i => i.description) ? data.items : [{ description: 'Example Service or Product', quantity: 1, price: 150.00 }],
-        notes: data.notes || 'Thank you for your business. Payment is due within 30 days.',
+        items: data.items.length > 0 ? data.items : [{ description: 'Example Service', quantity: '1', price: '150.00' }],
+        notes: data.notes || '',
         taxRate: Number(data.taxRate) || 0,
         discountRate: Number(data.discountRate) || 0,
     };
@@ -39,7 +47,8 @@ export const EditorialTemplate: React.FC<EditorialTemplateProps> = ({ data }) =>
                 <div className="max-w-[60%]">
                     <div className="text-base font-extrabold uppercase tracking-[-0.5px] mb-1.5">{safeData.fromName}</div>
                     <div className="text-[10px] text-gray-600 uppercase tracking-wide leading-relaxed whitespace-pre-line">
-                        {safeData.fromAddress}
+                       {safeData.fromRegNo && <>{safeData.fromRegNo}<br/></>}
+                       {safeData.fromAddress}
                     </div>
                 </div>
                 <div className="text-[42px] font-extrabold tracking-[-2px] leading-none">INVOICE</div>
@@ -80,14 +89,15 @@ export const EditorialTemplate: React.FC<EditorialTemplateProps> = ({ data }) =>
                 <tbody>
                     {safeData.items.map((item, index) => {
                         const itemTotal = (Number(item.quantity) || 0) * (Number(item.price) || 0);
+                        const isNumeric = !isNaN(Number(item.quantity)) && !isNaN(Number(item.price));
                         return (
                             <tr key={index}>
                                 <td className="py-[15px] border-b border-gray-200 text-left">
                                     <div className="text-[13px] font-semibold">{item.description || '...'}</div>
                                 </td>
-                                <td className="py-[15px] border-b border-gray-200 text-right">{Number(item.quantity) || 0}</td>
-                                <td className="py-[15px] border-b border-gray-200 text-right">{formatCurrency(Number(item.price) || 0)}</td>
-                                <td className="py-[15px] border-b border-gray-200 text-right">{formatCurrency(itemTotal)}</td>
+                                <td className="py-[15px] border-b border-gray-200 text-right">{item.quantity}</td>
+                                <td className="py-[15px] border-b border-gray-200 text-right">{formatPrice(item.price)}</td>
+                                <td className="py-[15px] border-b border-gray-200 text-right">{isNumeric ? formatCurrency(itemTotal) : '-'}</td>
                             </tr>
                         );
                     })}
@@ -121,9 +131,22 @@ export const EditorialTemplate: React.FC<EditorialTemplateProps> = ({ data }) =>
                 </div>
             </div>
 
-            <footer className="mt-auto pt-[30px] border-t-2 border-black">
+            <footer className="mt-auto pt-[30px] border-t-2 border-black grid grid-cols-2 gap-10">
+                 <div>
+                     {safeData.paymentDetails && (safeData.paymentDetails.bankName || safeData.paymentDetails.accountName) && (
+                        <>
+                            <div className="text-[9px] uppercase tracking-widest font-extrabold mb-2.5">Payment Instructions</div>
+                             <div className="text-gray-700 leading-relaxed whitespace-pre-line text-[11px] space-y-1">
+                                {safeData.paymentDetails.bankName && <p><strong>Bank:</strong> {safeData.paymentDetails.bankName}</p>}
+                                {safeData.paymentDetails.accountName && <p><strong>Account Name:</strong> {safeData.paymentDetails.accountName}</p>}
+                                {safeData.paymentDetails.accountNumber && <p><strong>Account No:</strong> {safeData.paymentDetails.accountNumber}</p>}
+                                {safeData.paymentDetails.paymentMethod && <p><strong>Method:</strong> {safeData.paymentDetails.paymentMethod}</p>}
+                            </div>
+                        </>
+                    )}
+                </div>
                  <div className="text-[11px]">
-                    <div className="text-[9px] uppercase tracking-widest font-extrabold mb-2.5">Terms, Notes & Payment Instructions</div>
+                    <div className="text-[9px] uppercase tracking-widest font-extrabold mb-2.5">Notes</div>
                     <div className="text-gray-700 leading-relaxed whitespace-pre-line">
                         {safeData.notes}
                     </div>

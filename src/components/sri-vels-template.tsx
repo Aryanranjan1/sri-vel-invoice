@@ -18,17 +18,25 @@ export const SriVelsTemplate: React.FC<SriVelsTemplateProps> = ({ data }) => {
     const formatCurrency = (amount: number) => {
         return 'RM ' + amount.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
+    
+    const formatPrice = (price: any) => {
+        const num = Number(price);
+        if (isNaN(num)) return price;
+        return formatCurrency(num);
+    }
 
     const safeData = {
+        ...data,
         invoiceNumber: data.invoiceNumber || 'INV-000',
         fromName: data.fromName || 'Your Company',
+        fromRegNo: data.fromRegNo,
         fromAddress: data.fromAddress || '123 Main St\nAnytown, USA',
         toName: data.toName || 'Client Company',
         toAddress: data.toAddress || '456 Client Ave\nClient City, USA',
         invoiceDate: data.invoiceDate || new Date(),
         dueDate: data.dueDate || new Date(),
-        items: data.items && data.items.length > 0 && data.items.some(i => i.description) ? data.items : [{ description: 'Example Service or Product', quantity: 1, price: 100.00 }],
-        notes: data.notes || 'Thank you for your business. Payment is due within 30 days.',
+        items: data.items.length > 0 ? data.items : [{ description: 'Example Service', quantity: '1', price: '100.00' }],
+        notes: data.notes || '',
         taxRate: Number(data.taxRate) || 0,
         discountRate: Number(data.discountRate) || 0,
     };
@@ -38,6 +46,7 @@ export const SriVelsTemplate: React.FC<SriVelsTemplateProps> = ({ data }) => {
             <header className="flex justify-between items-start mb-10 pb-6 border-b-2 border-black">
                 <div className="flex-1">
                     <div className="text-lg font-bold uppercase tracking-wide">{safeData.fromName}</div>
+                    {safeData.fromRegNo && <div className="text-xs text-gray-600 mb-2">{safeData.fromRegNo}</div>}
                     <div className="text-xs text-gray-800 whitespace-pre-line">
                         {safeData.fromAddress}
                     </div>
@@ -83,14 +92,15 @@ export const SriVelsTemplate: React.FC<SriVelsTemplateProps> = ({ data }) => {
                 <tbody>
                     {safeData.items.map((item, index) => {
                         const itemTotal = (Number(item.quantity) || 0) * (Number(item.price) || 0);
+                        const isNumeric = !isNaN(Number(item.quantity)) && !isNaN(Number(item.price));
                         return (
                             <tr key={index} className="last:border-b-0">
                                 <td className="p-3 border-b border-gray-200">
                                     <div className="font-semibold">{item.description || '...'}</div>
                                 </td>
-                                <td className="p-3 border-b border-gray-200 text-right">{Number(item.quantity) || 0}</td>
-                                <td className="p-3 border-b border-gray-200 text-right">{formatCurrency(Number(item.price) || 0)}</td>
-                                <td className="p-3 border-b border-gray-200 text-right">{formatCurrency(itemTotal)}</td>
+                                <td className="p-3 border-b border-gray-200 text-right">{item.quantity}</td>
+                                <td className="p-3 border-b border-gray-200 text-right">{formatPrice(item.price)}</td>
+                                <td className="p-3 border-b border-gray-200 text-right">{isNumeric ? formatCurrency(itemTotal) : '-'}</td>
                             </tr>
                         );
                     })}
@@ -124,9 +134,28 @@ export const SriVelsTemplate: React.FC<SriVelsTemplateProps> = ({ data }) => {
                 </div>
             </div>
 
-            <div className="mt-auto pt-8 text-gray-800 text-[11px]">
-                <div className="text-[10px] uppercase font-bold tracking-widest text-gray-600 border-b border-gray-300 pb-1 mb-2">Notes & Payment Details</div>
-                <p className="whitespace-pre-line">{safeData.notes}</p>
+            <div className="mt-auto pt-8 text-gray-800 text-[11px] grid grid-cols-2 gap-10">
+                <div>
+                     {safeData.notes && (
+                        <>
+                            <div className="text-[10px] uppercase font-bold tracking-widest text-gray-600 border-b border-gray-300 pb-1 mb-2">Notes</div>
+                            <p className="whitespace-pre-line">{safeData.notes}</p>
+                        </>
+                    )}
+                </div>
+                 <div>
+                    {safeData.paymentDetails && (safeData.paymentDetails.bankName || safeData.paymentDetails.accountName) && (
+                        <>
+                        <div className="text-[10px] uppercase font-bold tracking-widest text-gray-600 border-b border-gray-300 pb-1 mb-2">Payment Details</div>
+                        <div className="space-y-1">
+                            {safeData.paymentDetails.bankName && <p><strong>Bank:</strong> {safeData.paymentDetails.bankName}</p>}
+                            {safeData.paymentDetails.accountName && <p><strong>Account Name:</strong> {safeData.paymentDetails.accountName}</p>}
+                            {safeData.paymentDetails.accountNumber && <p><strong>Account No:</strong> {safeData.paymentDetails.accountNumber}</p>}
+                            {safeData.paymentDetails.paymentMethod && <p><strong>Method:</strong> {safeData.paymentDetails.paymentMethod}</p>}
+                        </div>
+                        </>
+                    )}
+                 </div>
             </div>
         </div>
     );

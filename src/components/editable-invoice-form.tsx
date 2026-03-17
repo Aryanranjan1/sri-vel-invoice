@@ -205,10 +205,24 @@ export function EditableInvoiceForm({ initialData, onUpdate, index }: EditableIn
                         />
                         <FormField
                             control={form.control}
+                            name="fromRegNo"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Registration No.</FormLabel>
+                                <FormControl>
+                                <Input placeholder="e.g. 123456-X" {...field} value={field.value ?? ''} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        </div>
+                        <FormField
+                            control={form.control}
                             name="fromEmail"
                             render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>Email (Optional)</FormLabel>
                                 <FormControl>
                                 <Input placeholder="your.email@company.com" {...field} value={field.value ?? ''} />
                                 </FormControl>
@@ -216,7 +230,6 @@ export function EditableInvoiceForm({ initialData, onUpdate, index }: EditableIn
                             </FormItem>
                             )}
                         />
-                        </div>
                         <FormField
                         control={form.control}
                         name="fromAddress"
@@ -234,7 +247,6 @@ export function EditableInvoiceForm({ initialData, onUpdate, index }: EditableIn
 
                     <div className="space-y-4">
                         <h3 className="text-xl font-semibold border-b pb-2">Bill To</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
                             name="toName"
@@ -253,7 +265,7 @@ export function EditableInvoiceForm({ initialData, onUpdate, index }: EditableIn
                             name="toEmail"
                             render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>Email (Optional)</FormLabel>
                                 <FormControl>
                                 <Input placeholder="client.email@company.com" {...field} value={field.value ?? ''} />
                                 </FormControl>
@@ -261,7 +273,6 @@ export function EditableInvoiceForm({ initialData, onUpdate, index }: EditableIn
                             </FormItem>
                             )}
                         />
-                        </div>
                         <FormField
                         control={form.control}
                         name="toAddress"
@@ -396,7 +407,7 @@ export function EditableInvoiceForm({ initialData, onUpdate, index }: EditableIn
                                     <FormItem>
                                         <FormLabel>Quantity</FormLabel>
                                         <FormControl>
-                                        <Input type="number" placeholder="1" {...field} value={field.value ?? 0} />
+                                        <Input type="text" placeholder="1" {...field} value={field.value ?? ''} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -409,7 +420,7 @@ export function EditableInvoiceForm({ initialData, onUpdate, index }: EditableIn
                                     <FormItem>
                                         <FormLabel>Price</FormLabel>
                                         <FormControl>
-                                        <Input type="number" placeholder="100.00" {...field} value={field.value ?? 0} />
+                                        <Input type="text" placeholder="100.00" {...field} value={field.value ?? ''} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -482,6 +493,65 @@ export function EditableInvoiceForm({ initialData, onUpdate, index }: EditableIn
                                 )}
                             />
                             </div>
+                        </div>
+                    </div>
+                     <div className="space-y-4">
+                        <h3 className="text-xl font-semibold border-b pb-2">Payment Instructions</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="paymentDetails.bankName"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Bank Name</FormLabel>
+                                    <FormControl>
+                                    <Input placeholder="e.g. MAYBANK" {...field} value={field.value ?? ''} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="paymentDetails.accountName"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Account Name</FormLabel>
+                                    <FormControl>
+                                    <Input placeholder="e.g. SRI VELS CATERING" {...field} value={field.value ?? ''} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="paymentDetails.accountNumber"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Account Number</FormLabel>
+                                    <FormControl>
+                                    <Input placeholder="e.g. 555015029067" {...field} value={field.value ?? ''} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="paymentDetails.paymentMethod"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Payment Method</FormLabel>
+                                    <FormControl>
+                                    <Input placeholder="e.g. Bank Transfer" {...field} value={field.value ?? ''} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
                         </div>
                     </div>
                     </form>

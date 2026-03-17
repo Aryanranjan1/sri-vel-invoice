@@ -42,6 +42,7 @@ export function ManualInvoiceGenerator() {
   const defaultValues: Partial<InvoiceFormValues> = {
     invoiceNumber: `INV-${String(Date.now()).slice(-6)}`,
     fromName: '',
+    fromRegNo: '',
     fromEmail: '',
     fromAddress: '',
     toName: '',
@@ -54,6 +55,12 @@ export function ManualInvoiceGenerator() {
     taxRate: 8, // Example tax
     discountRate: 0,
     template: 'modern',
+    paymentDetails: {
+      bankName: 'MAYBANK',
+      accountName: 'SRI VELS CATERING',
+      accountNumber: '555015029067',
+      paymentMethod: 'Bank Transfer',
+    },
   };
 
   const form = useForm<InvoiceFormValues>({
@@ -196,34 +203,47 @@ export function ManualInvoiceGenerator() {
               />
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold border-b pb-2">From</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="fromName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your Company" {...field} value={field.value ?? ''} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="fromName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Your Company" {...field} value={field.value ?? ''} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="fromRegNo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Registration No.</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. 123456-X" {...field} value={field.value ?? ''} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                 </div>
+                <FormField
                     control={form.control}
                     name="fromEmail"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
+                    <FormItem>
+                        <FormLabel>Email (Optional)</FormLabel>
                         <FormControl>
-                          <Input placeholder="your.email@company.com" {...field} value={field.value ?? ''} />
+                        <Input placeholder="your.email@company.com" {...field} value={field.value ?? ''} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
+                    </FormItem>
                     )}
-                  />
-                </div>
+                />
                 <FormField
                   control={form.control}
                   name="fromAddress"
@@ -241,34 +261,32 @@ export function ManualInvoiceGenerator() {
 
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold border-b pb-2">Bill To</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
+                <FormField
                     control={form.control}
                     name="toName"
                     render={({ field }) => (
-                      <FormItem>
+                    <FormItem>
                         <FormLabel>Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Client Company" {...field} value={field.value ?? ''} />
+                        <Input placeholder="Client Company" {...field} value={field.value ?? ''} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
+                    </FormItem>
                     )}
-                  />
-                  <FormField
+                />
+                <FormField
                     control={form.control}
                     name="toEmail"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
+                    <FormItem>
+                        <FormLabel>Email (Optional)</FormLabel>
                         <FormControl>
-                          <Input placeholder="client.email@company.com" {...field} value={field.value ?? ''} />
+                        <Input placeholder="client.email@company.com" {...field} value={field.value ?? ''} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
+                    </FormItem>
                     )}
-                  />
-                </div>
+                />
                 <FormField
                   control={form.control}
                   name="toAddress"
@@ -406,7 +424,7 @@ export function ManualInvoiceGenerator() {
                               <FormItem>
                                 <FormLabel>Quantity</FormLabel>
                                 <FormControl>
-                                  <Input type="number" placeholder="1" {...field} value={field.value ?? 0} />
+                                  <Input type="text" placeholder="1" {...field} value={field.value ?? ''} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -419,7 +437,7 @@ export function ManualInvoiceGenerator() {
                               <FormItem>
                                 <FormLabel>Price</FormLabel>
                                 <FormControl>
-                                  <Input type="number" placeholder="100.00" {...field} value={field.value ?? 0} />
+                                  <Input type="text" placeholder="100.00" {...field} value={field.value ?? ''} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -492,6 +510,65 @@ export function ManualInvoiceGenerator() {
                          )}
                        />
                     </div>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold border-b pb-2">Payment Instructions</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="paymentDetails.bankName"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Bank Name</FormLabel>
+                            <FormControl>
+                            <Input placeholder="e.g. MAYBANK" {...field} value={field.value ?? ''} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="paymentDetails.accountName"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Account Name</FormLabel>
+                            <FormControl>
+                            <Input placeholder="e.g. SRI VELS CATERING" {...field} value={field.value ?? ''} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="paymentDetails.accountNumber"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Account Number</FormLabel>
+                            <FormControl>
+                            <Input placeholder="e.g. 555015029067" {...field} value={field.value ?? ''} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="paymentDetails.paymentMethod"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Payment Method</FormLabel>
+                            <FormControl>
+                            <Input placeholder="e.g. Bank Transfer" {...field} value={field.value ?? ''} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
                 </div>
               </div>
             </form>

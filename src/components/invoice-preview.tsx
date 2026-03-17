@@ -43,20 +43,28 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
     const total = subtotalAfterDiscount + taxAmount;
 
     const safeData = {
+        ...data,
         invoiceNumber: data.invoiceNumber || 'INV-000000',
         fromName: data.fromName || 'Your Company',
+        fromRegNo: data.fromRegNo || '',
         fromAddress: data.fromAddress || '123 Main St, Anytown, USA',
-        fromEmail: data.fromEmail || 'contact@yourcompany.com',
+        fromEmail: data.fromEmail || '',
         toName: data.toName || 'Client Company',
         toAddress: data.toAddress || '456 Client Ave, Anytown, USA',
-        toEmail: data.toEmail || 'contact@client.com',
+        toEmail: data.toEmail || '',
         invoiceDate: data.invoiceDate || new Date(),
         dueDate: data.dueDate || new Date(),
         notes: data.notes || '',
-        items: data.items || [],
+        items: data.items.length > 0 ? data.items : [{description: 'Example Item', quantity: 1, price: 100}],
         taxRate: Number(data.taxRate) || 0,
         discountRate: Number(data.discountRate) || 0,
     };
+    
+    const formatPrice = (price: any) => {
+        const num = Number(price);
+        if (isNaN(num)) return price;
+        return `RM${num.toFixed(2)}`;
+    }
 
     return (
         <Card ref={ref} className={cn(
@@ -81,8 +89,9 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
                     template === 'minimal' && 'hidden'
                 )}>
                     <p className="font-bold text-base">{safeData.fromName}</p>
+                    {safeData.fromRegNo && <p className="text-muted-foreground text-xs">{safeData.fromRegNo}</p>}
                     <p className="text-muted-foreground text-xs whitespace-pre-line">{safeData.fromAddress}</p>
-                    <p className="text-muted-foreground text-xs">{safeData.fromEmail}</p>
+                    {safeData.fromEmail && <p className="text-muted-foreground text-xs">{safeData.fromEmail}</p>}
                 </div>
             </CardHeader>
             <CardContent className="p-6 flex-grow flex flex-col">
@@ -92,7 +101,7 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
                         <h3 className="font-semibold mb-2">Bill To:</h3>
                         <p className="font-bold">{safeData.toName}</p>
                         <p className="text-muted-foreground whitespace-pre-line">{safeData.toAddress}</p>
-                        <p className="text-muted-foreground">{safeData.toEmail}</p>
+                        {safeData.toEmail && <p className="text-muted-foreground">{safeData.toEmail}</p>}
                     </div>
                     <div className="text-right space-y-1">
                         <p><strong>Invoice Date:</strong> {format(safeData.invoiceDate, 'PPP')}</p>
@@ -113,12 +122,13 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
                         <TableBody>
                             {safeData.items.map((item, index) => {
                                 const itemTotal = (Number(item.quantity) || 0) * (Number(item.price) || 0);
+                                const isNumeric = !isNaN(Number(item.quantity)) && !isNaN(Number(item.price));
                                 return (
                                     <TableRow key={index} className="last:border-b-0">
                                         <TableCell className="font-medium">{item.description || '...'}</TableCell>
-                                        <TableCell className="text-center">{Number(item.quantity) || 0}</TableCell>
-                                        <TableCell className="text-right">RM{(Number(item.price) || 0).toFixed(2)}</TableCell>
-                                        <TableCell className="text-right">RM{itemTotal.toFixed(2)}</TableCell>
+                                        <TableCell className="text-center">{item.quantity}</TableCell>
+                                        <TableCell className="text-right">{formatPrice(item.price)}</TableCell>
+                                        <TableCell className="text-right">{isNumeric ? `RM${itemTotal.toFixed(2)}` : '-'}</TableCell>
                                     </TableRow>
                                 );
                             })}
@@ -133,6 +143,20 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
                             <div>
                                 <h3 className="font-semibold mb-2">Notes</h3>
                                 <p className="text-sm text-muted-foreground whitespace-pre-line">{safeData.notes}</p>
+                            </div>
+                        </>
+                    )}
+                    {safeData.paymentDetails && (safeData.paymentDetails.bankName || safeData.paymentDetails.accountName || safeData.paymentDetails.accountNumber) && (
+                        <>
+                            <Separator className="my-6" />
+                            <div>
+                                <h3 className="font-semibold mb-2">Payment Instructions</h3>
+                                <div className="text-sm text-muted-foreground space-y-1">
+                                    {safeData.paymentDetails.bankName && <p><strong>Bank:</strong> {safeData.paymentDetails.bankName}</p>}
+                                    {safeData.paymentDetails.accountName && <p><strong>Account Name:</strong> {safeData.paymentDetails.accountName}</p>}
+                                    {safeData.paymentDetails.accountNumber && <p><strong>Account No:</strong> {safeData.paymentDetails.accountNumber}</p>}
+                                    {safeData.paymentDetails.paymentMethod && <p><strong>Method:</strong> {safeData.paymentDetails.paymentMethod}</p>}
+                                </div>
                             </div>
                         </>
                     )}

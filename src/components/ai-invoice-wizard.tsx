@@ -45,6 +45,7 @@ export function AiInvoiceWizard() {
         return {
           invoiceNumber: `INV-${String(Date.now()).slice(-6)}-${index}`,
           fromName: '',
+          fromRegNo: '',
           fromEmail: '',
           fromAddress: '',
           toName: extracted.clientName || '',
@@ -61,6 +62,12 @@ export function AiInvoiceWizard() {
           taxRate: 8,
           discountRate: 0,
           template: 'modern',
+          paymentDetails: {
+            bankName: 'MAYBANK',
+            accountName: 'SRI VELS CATERING',
+            accountNumber: '555015029067',
+            paymentMethod: 'Bank Transfer',
+          },
         };
       });
 
