@@ -7,31 +7,11 @@ import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { type InvoiceFormValues } from '@/types/invoice';
 
-// This should match the form values type from the new invoice page
-export type InvoiceFormData = {
-  invoiceNumber?: string;
-  fromName?: string;
-  fromEmail?: string;
-  fromAddress?: string;
-  toName?: string;
-  toEmail?: string;
-  toAddress?: string;
-  invoiceDate?: Date;
-  dueDate?: Date;
-  items: {
-      description: string;
-      quantity: number;
-      price: number;
-  }[];
-  notes?: string;
-  taxRate?: number;
-  discountRate?: number;
-  template?: string;
-};
 
 type InvoicePreviewProps = {
-  data: InvoiceFormData;
+  data: InvoiceFormValues;
   template?: string;
 };
 
@@ -61,19 +41,19 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
 
     return (
         <Card ref={ref} className={cn(
-            "w-full max-w-4xl mx-auto my-8 print:shadow-none print:border-none print:my-0 bg-card",
+            "w-full max-w-2xl mx-auto my-8 print:shadow-none print:border-none print:my-0 bg-card aspect-[210/297] text-sm",
             template === 'classic' && 'font-serif',
             template === 'minimal' && 'border-none shadow-none',
         )}>
             <CardHeader className={cn(
-                "flex flex-row justify-between items-start",
+                "flex flex-row justify-between items-start p-8",
                 template === 'classic' && "border-b-2 border-gray-800 pb-8 dark:border-gray-300"
             )}>
                 <div>
                     <h1 className={cn(
-                        "text-3xl font-bold font-headline",
-                        template === 'classic' && "text-4xl",
-                        template === 'minimal' && "text-2xl font-semibold",
+                        "text-2xl font-bold font-headline",
+                        template === 'classic' && "text-3xl",
+                        template === 'minimal' && "text-xl font-semibold",
                     )}>Invoice</h1>
                     <p className="text-muted-foreground">#{safeData.invoiceNumber}</p>
                 </div>
@@ -81,12 +61,12 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
                     "text-right",
                     template === 'minimal' && 'hidden'
                 )}>
-                    <p className="font-bold text-lg">{safeData.fromName}</p>
-                    <p className="text-muted-foreground">{safeData.fromAddress}</p>
-                    <p className="text-muted-foreground">{safeData.fromEmail}</p>
+                    <p className="font-bold text-base">{safeData.fromName}</p>
+                    <p className="text-muted-foreground text-xs">{safeData.fromAddress}</p>
+                    <p className="text-muted-foreground text-xs">{safeData.fromEmail}</p>
                 </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-8">
                 <Separator className={cn("my-4", template === 'minimal' && 'hidden', template === 'classic' && 'border-gray-800 dark:border-gray-300')} />
                 <div className="grid grid-cols-2 gap-8 mb-8">
                     <div>
@@ -117,8 +97,8 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
                                 <TableRow key={index} className="last:border-b-0">
                                     <TableCell className="font-medium">{item.description || '...'}</TableCell>
                                     <TableCell className="text-center">{Number(item.quantity) || 0}</TableCell>
-                                    <TableCell className="text-right">${(Number(item.price) || 0).toFixed(2)}</TableCell>
-                                    <TableCell className="text-right">${itemTotal.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">RM{(Number(item.price) || 0).toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">RM{itemTotal.toFixed(2)}</TableCell>
                                 </TableRow>
                             );
                         })}
@@ -131,22 +111,22 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
                     <div className="w-full max-w-xs space-y-2">
                         <div className="flex justify-between">
                             <span>Subtotal:</span>
-                            <span>${subtotal.toFixed(2)}</span>
+                            <span>RM{subtotal.toFixed(2)}</span>
                         </div>
                          {safeData.discountRate > 0 && (
                              <div className="flex justify-between">
                                  <span>Discount ({safeData.discountRate}%):</span>
-                                 <span className="text-red-500">-${discountAmount.toFixed(2)}</span>
+                                 <span className="text-red-500">-RM{discountAmount.toFixed(2)}</span>
                              </div>
                          )}
                         <div className="flex justify-between">
                             <span>Tax ({safeData.taxRate}%):</span>
-                            <span>${taxAmount.toFixed(2)}</span>
+                            <span>RM{taxAmount.toFixed(2)}</span>
                         </div>
                         <Separator className="my-2" />
                         <div className="flex justify-between font-bold text-lg">
                             <span>Total:</span>
-                            <span>${total.toFixed(2)}</span>
+                            <span>RM{total.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
@@ -162,7 +142,7 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
                 )}
 
             </CardContent>
-            <CardFooter>
+            <CardFooter className="p-8">
                  <p className="text-xs text-muted-foreground w-full text-center">Thank you for your business!</p>
             </CardFooter>
         </Card>

@@ -3,7 +3,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useFieldArray, useForm } from 'react-hook-form';
-import * as z from 'zod';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +25,7 @@ import {
 } from '@/components/ui/popover';
 import { CalendarIcon, Download, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { InvoicePreview, type InvoiceFormData } from '@/components/invoice-preview';
+import { InvoicePreview } from '@/components/invoice-preview';
 import { useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -34,32 +33,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { AIInvoiceExtractor } from '@/components/ai-invoice-extractor';
+import { type InvoiceFormValues, invoiceFormSchema } from '@/types/invoice';
 
-
-const lineItemSchema = z.object({
-  description: z.string().min(1, 'Description is required.'),
-  quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1.'),
-  price: z.coerce.number().min(0.01, 'Price must be a positive number.'),
-});
-
-const invoiceFormSchema = z.object({
-  invoiceNumber: z.string().min(1, 'Invoice number is required'),
-  fromName: z.string().min(1, '"From" name is required'),
-  fromEmail: z.string().email(),
-  fromAddress: z.string().min(1, '"From" address is required'),
-  toName: z.string().min(1, '"To" name is required'),
-  toEmail: z.string().email(),
-  toAddress: z.string().min(1, '"To" address is required'),
-  invoiceDate: z.date({ required_error: "Invoice date is required." }),
-  dueDate: z.date({ required_error: "Due date is required." }),
-  items: z.array(lineItemSchema).min(1, 'Please add at least one item.'),
-  notes: z.string().optional(),
-  taxRate: z.coerce.number().min(0).max(100).optional().default(0),
-  discountRate: z.coerce.number().min(0).max(100).optional().default(0),
-  template: z.string().optional().default('modern'),
-});
-
-export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
 
 export default function InvoiceGeneratorPage() {
     const { toast } = useToast();
@@ -122,12 +97,22 @@ export default function InvoiceGeneratorPage() {
             link.click();
             document.body.removeChild(link);
         } else { // pdf
-            const pdf = new jsPDF({
-                orientation: 'p',
-                unit: 'px',
-                format: [canvas.width, canvas.height]
-            });
-            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            
+            const canvasAspectRatio = canvas.width / canvas.height;
+            let imgWidth = pdfWidth;
+            let imgHeight = pdfWidth / canvasAspectRatio;
+
+            if (imgHeight > pdfHeight) {
+                imgHeight = pdfHeight;
+                imgWidth = pdfHeight * canvasAspectRatio;
+            }
+
+            const xOffset = (pdfWidth - imgWidth) / 2;
+
+            pdf.addImage(imgData, 'PNG', xOffset, 0, imgWidth, imgHeight);
             pdf.save(`invoice-${form.getValues('invoiceNumber') || 'download'}.pdf`);
         }
          toast({ title: 'Download Started!', description: `Your invoice has been downloaded.` });
@@ -141,7 +126,7 @@ export default function InvoiceGeneratorPage() {
     }
   };
   
-  const watchedData = form.watch() as InvoiceFormData;
+  const watchedData = form.watch() as InvoiceFormValues;
   const invoiceDate = form.watch('invoiceDate');
   const watchedTemplate = form.watch('template');
 

@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Sparkles } from 'lucide-react';
 import { extractInvoiceData } from '@/ai/flows/extract-invoice-data';
-import { type InvoiceFormValues } from '@/app/invoice/new/page';
+import { type InvoiceFormValues } from '@/types/invoice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 
 interface AIInvoiceExtractorProps {
