@@ -27,10 +27,10 @@ export type InvoiceFormData = {
 };
 
 export function InvoicePreview({ data }: { data: InvoiceFormData }) {
-    const subtotal = data.items.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
-    const discountAmount = subtotal * ((data.discountRate || 0) / 100);
+    const subtotal = data.items.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
+    const discountAmount = subtotal * ((Number(data.discountRate) || 0) / 100);
     const subtotalAfterDiscount = subtotal - discountAmount;
-    const taxAmount = subtotalAfterDiscount * ((data.taxRate || 0) / 100);
+    const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
 
     const safeData = {
@@ -45,8 +45,8 @@ export function InvoicePreview({ data }: { data: InvoiceFormData }) {
         dueDate: data.dueDate || new Date(),
         notes: data.notes || '',
         items: data.items || [],
-        taxRate: data.taxRate || 0,
-        discountRate: data.discountRate || 0,
+        taxRate: Number(data.taxRate) || 0,
+        discountRate: Number(data.discountRate) || 0,
     };
 
     return (
@@ -88,12 +88,12 @@ export function InvoicePreview({ data }: { data: InvoiceFormData }) {
                     </TableHeader>
                     <TableBody>
                         {safeData.items.map((item, index) => {
-                            const itemTotal = (item.quantity || 0) * (item.price || 0);
+                            const itemTotal = (Number(item.quantity) || 0) * (Number(item.price) || 0);
                             return (
                                 <TableRow key={index}>
                                     <TableCell className="font-medium">{item.description || '...'}</TableCell>
-                                    <TableCell className="text-center">{item.quantity || 0}</TableCell>
-                                    <TableCell className="text-right">${(item.price || 0).toFixed(2)}</TableCell>
+                                    <TableCell className="text-center">{Number(item.quantity) || 0}</TableCell>
+                                    <TableCell className="text-right">${(Number(item.price) || 0).toFixed(2)}</TableCell>
                                     <TableCell className="text-right">${itemTotal.toFixed(2)}</TableCell>
                                 </TableRow>
                             );
