@@ -56,6 +56,7 @@ export function AiInvoiceWizard({ invoices, setInvoices, activeInvoiceIndex, set
 
         return {
           ...(defaultValues as InvoiceFormValues),
+          template: 'default',
           invoiceNumber: `INV-${String(Date.now()).slice(-6)}-${index}`,
           toName: extracted.clientName || '',
           notes: [extracted.title, extracted.notes].filter(Boolean).join('\n\n') || defaultValues.notes || '',
@@ -132,7 +133,7 @@ export function AiInvoiceWizard({ invoices, setInvoices, activeInvoiceIndex, set
         placeholder="e.g., Matthene wants 100 pax lunch on the 17th. RM7.20 each. Include Podelanga. Apply 8% tax."
         value={unstructuredText}
         onChange={(e) => setUnstructuredText(e.target.value)}
-        className="min-h-[150px] bg-card"
+        className="min-h-[150px]"
         disabled={isLoading}
         />
         <Button onClick={handleExtract} disabled={isLoading || !unstructuredText} className="w-full sm:w-auto">

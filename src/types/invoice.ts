@@ -2,15 +2,24 @@ import * as z from 'zod';
 
 export const lineItemSchema = z.object({
   description: z.string().min(1, 'Description is required.'),
-  quantity: z.any().refine(value => value !== '' && value !== null && value !== undefined, {
+  quantity: z.any().refine(value => {
+    if (typeof value === 'string' && value.trim() !== '') return true;
+    if (typeof value === 'number') return true;
+    return value !== null && value !== undefined;
+  }, {
     message: 'Quantity is required.',
   }),
-  price: z.any().refine(value => value !== '' && value !== null && value !== undefined, {
+  price: z.any().refine(value => {
+    if (typeof value === 'string' && value.trim() !== '') return true;
+    if (typeof value === 'number') return true;
+    return value !== null && value !== undefined;
+  }, {
     message: 'Price is required.',
   }),
 });
 
 export const invoiceFormSchema = z.object({
+  template: z.enum(['default', 'sri-vels', 'editorial']).default('default'),
   invoiceNumber: z.string().min(1, 'Invoice number is required'),
   fromName: z.string().min(1, '"From" name is required'),
   fromRegNo: z.string().optional(),
