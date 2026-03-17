@@ -183,6 +183,7 @@ export function ManualInvoiceGenerator() {
                         <SelectItem value="modern">Modern</SelectItem>
                         <SelectItem value="classic">Classic</SelectItem>
                         <SelectItem value="minimal">Minimal</SelectItem>
+                        <SelectItem value="sri-vels">Sri Vels</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormDescription>
