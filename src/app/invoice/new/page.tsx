@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -107,25 +108,187 @@ export default function NewInvoicePage() {
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold border-b pb-2">From</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField control={form.control} name="fromName" render={({ field }) => ( <FormItem> <FormLabel>Name</FormLabel> <FormControl> <Input placeholder="Your Company" {...field} value={field.value ?? ''} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                  <FormField control={form.control} name="fromEmail" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl> <Input placeholder="your.email@company.com" {...field} value={field.value ?? ''} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                  <FormField
+                    control={form.control}
+                    name="fromName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Your Company" {...field} value={field.value ?? ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="fromEmail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="your.email@company.com" {...field} value={field.value ?? ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-                <FormField control={form.control} name="fromAddress" render={({ field }) => ( <FormItem> <FormLabel>Address</FormLabel> <FormControl> <Textarea placeholder="123 Main St..." {...field} value={field.value ?? ''} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                <FormField
+                  control={form.control}
+                  name="fromAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="123 Main St..." {...field} value={field.value ?? ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold border-b pb-2">Bill To</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="toName" render={({ field }) => ( <FormItem> <FormLabel>Name</FormLabel> <FormControl> <Input placeholder="Client Company" {...field} value={field.value ?? ''} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                    <FormField control={form.control} name="toEmail" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl> <Input placeholder="client.email@company.com" {...field} value={field.value ?? ''} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                  <FormField
+                    control={form.control}
+                    name="toName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Client Company" {...field} value={field.value ?? ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="toEmail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="client.email@company.com" {...field} value={field.value ?? ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-                <FormField control={form.control} name="toAddress" render={({ field }) => ( <FormItem> <FormLabel>Address</FormLabel> <FormControl> <Textarea placeholder="456 Client Ave..." {...field} value={field.value ?? ''} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                <FormField
+                  control={form.control}
+                  name="toAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="456 Client Ave..." {...field} value={field.value ?? ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField control={form.control} name="invoiceNumber" render={({ field }) => ( <FormItem> <FormLabel>Invoice Number</FormLabel> <FormControl> <Input {...field} value={field.value ?? ''}/> </FormControl> <FormMessage /> </FormItem> )}/>
-                <FormField control={form.control} name="invoiceDate" render={({ field }) => ( <FormItem className="flex flex-col pt-2"> <FormLabel>Invoice Date</FormLabel> <Popover> <PopoverTrigger asChild> <FormControl> <Button variant={'outline'} className={cn('pl-3 text-left font-normal justify-start', !field.value && 'text-muted-foreground' )}> <CalendarIcon className="mr-2 h-4 w-4" /> {field.value ? ( format(field.value, 'PPP') ) : ( <span>Pick a date</span> )} </Button> </FormControl> </PopoverTrigger> <PopoverContent className="w-auto p-0" align="start"> <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date > new Date() || date < new Date('1900-01-01') } initialFocus /> </PopoverContent> </Popover> <FormMessage /> </FormItem> )}/>
-                <FormField control={form.control} name="dueDate" render={({ field }) => ( <FormItem className="flex flex-col pt-2"> <FormLabel>Due Date</FormLabel> <Popover> <PopoverTrigger asChild> <FormControl> <Button variant={'outline'} className={cn( 'pl-3 text-left font-normal justify-start', !field.value && 'text-muted-foreground' )}> <CalendarIcon className="mr-2 h-4 w-4" /> {field.value ? ( format(field.value, 'PPP') ) : ( <span>Pick a date</span> )} </Button> </FormControl> </PopoverTrigger> <PopoverContent className="w-auto p-0" align="start"> <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < invoiceDate } initialFocus /> </PopoverContent> </Popover> <FormMessage /> </FormItem> )}/>
+                <FormField
+                  control={form.control}
+                  name="invoiceNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Invoice Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value ?? ''}/>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="invoiceDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col pt-2">
+                      <FormLabel>Invoice Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={'outline'}
+                              className={cn(
+                                'pl-3 text-left font-normal justify-start',
+                                !field.value && 'text-muted-foreground'
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? (
+                                format(field.value, 'PPP')
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date('1900-01-01')
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col pt-2">
+                      <FormLabel>Due Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={'outline'}
+                              className={cn(
+                                'pl-3 text-left font-normal justify-start',
+                                !field.value && 'text-muted-foreground'
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? (
+                                format(field.value, 'PPP')
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < invoiceDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <div>
@@ -134,28 +297,114 @@ export default function NewInvoicePage() {
                   {fields.map((field, index) => (
                     <div key={field.id} className="flex items-end gap-2 p-3 rounded-md border bg-muted/20">
                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-grow">
-                          <FormField control={form.control} name={`items.${index}.description`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl> <Input placeholder="Item description" {...field} value={field.value ?? ''} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                          <FormField control={form.control} name={`items.${index}.quantity`} render={({ field }) => ( <FormItem> <FormLabel>Quantity</FormLabel> <FormControl> <Input type="number" placeholder="1" {...field} value={field.value ?? 0} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                          <FormField control={form.control} name={`items.${index}.price`} render={({ field }) => ( <FormItem> <FormLabel>Price</FormLabel> <FormControl> <Input type="number" placeholder="100.00" {...field} value={field.value ?? 0} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                          <FormField
+                            control={form.control}
+                            name={`items.${index}.description`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Description</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Item description" {...field} value={field.value ?? ''} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`items.${index}.quantity`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Quantity</FormLabel>
+                                <FormControl>
+                                  <Input type="number" placeholder="1" {...field} value={field.value ?? 0} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`items.${index}.price`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Price</FormLabel>
+                                <FormControl>
+                                  <Input type="number" placeholder="100.00" {...field} value={field.value ?? 0} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </div>
-                      <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)} disabled={fields.length <= 1}> <Trash2 /> </Button>
+                      <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)} disabled={fields.length <= 1}>
+                        <Trash2 />
+                      </Button>
                     </div>
                   ))}
                 </div>
-                <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => append({ description: '', quantity: 1, price: 0 })}> <Plus className="mr-2" /> Add Item </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-4"
+                  onClick={() => append({ description: '', quantity: 1, price: 0 })}
+                >
+                  <Plus className="mr-2" /> Add Item
+                </Button>
               </div>
               
                <div className="space-y-4">
                 <h2 className="text-xl font-semibold border-b pb-2">Totals & Notes</h2>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="notes" render={({ field }) => ( <FormItem> <FormLabel>Notes</FormLabel> <FormControl> <Textarea placeholder="Add any additional notes for the client..." className="resize-none" {...field} value={field.value ?? ''} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                    <FormField
+                      control={form.control}
+                      name="notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Notes</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Add any additional notes for the client..."
+                              className="resize-none"
+                              {...field}
+                              value={field.value ?? ''}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <div className="space-y-2">
-                       <FormField control={form.control} name="discountRate" render={({ field }) => ( <FormItem> <FormLabel>Discount (%)</FormLabel> <FormControl> <Input type="number" placeholder="0" {...field} value={field.value ?? 0} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                       <FormField control={form.control} name="taxRate" render={({ field }) => ( <FormItem> <FormLabel>Tax (%)</FormLabel> <FormControl> <Input type="number" placeholder="0" {...field} value={field.value ?? 0} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                       <FormField
+                         control={form.control}
+                         name="discountRate"
+                         render={({ field }) => (
+                           <FormItem>
+                             <FormLabel>Discount (%)</FormLabel>
+                             <FormControl>
+                               <Input type="number" placeholder="0" {...field} value={field.value ?? 0} />
+                             </FormControl>
+                             <FormMessage />
+                           </FormItem>
+                         )}
+                       />
+                       <FormField
+                         control={form.control}
+                         name="taxRate"
+                         render={({ field }) => (
+                           <FormItem>
+                             <FormLabel>Tax (%)</FormLabel>
+                             <FormControl>
+                               <Input type="number" placeholder="0" {...field} value={field.value ?? 0} />
+                             </FormControl>
+                             <FormMessage />
+                           </FormItem>
+                         )}
+                       />
                     </div>
                 </div>
               </div>
-
 
               <div className="flex justify-end gap-2">
                 <Button type="submit">Save Invoice</Button>
@@ -173,3 +422,5 @@ export default function NewInvoicePage() {
     </div>
   );
 }
+
+    
