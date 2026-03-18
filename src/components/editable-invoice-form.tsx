@@ -44,8 +44,20 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
   });
 
   useEffect(() => {
-    const subscription = form.watch((value) => {
-        onUpdate(value as InvoiceFormValues);
+    const subscription = form.watch((value, { name, type }) => {
+      const newValues = value as InvoiceFormValues;
+      if (name === 'documentType' && type === 'change') {
+        if (newValues.documentType === 'receipt') {
+          if (newValues.invoiceNumber.startsWith('INV-')) {
+            form.setValue('invoiceNumber', newValues.invoiceNumber.replace('INV-', 'REC-'));
+          }
+        } else {
+          if (newValues.invoiceNumber.startsWith('REC-')) {
+            form.setValue('invoiceNumber', newValues.invoiceNumber.replace('REC-', 'INV-'));
+          }
+        }
+      }
+      onUpdate(newValues);
     });
     return () => subscription.unsubscribe();
   }, [form, onUpdate]);

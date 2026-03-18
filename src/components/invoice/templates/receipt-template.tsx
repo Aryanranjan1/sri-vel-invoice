@@ -18,7 +18,10 @@ export const ReceiptTemplate = ({ data }: TemplateProps) => {
     const subtotalAfterDiscount = subtotal - discountAmount;
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
-    const amountPaid = Number(data.amountPaid) || 0;
+    
+    // If amountPaid is not a valid, positive number, default it to the total for the receipt.
+    const parsedAmountPaid = Number(data.amountPaid);
+    const amountPaid = !isNaN(parsedAmountPaid) && parsedAmountPaid > 0 ? parsedAmountPaid : total;
     const balanceDue = total - amountPaid;
 
 
@@ -106,7 +109,7 @@ export const ReceiptTemplate = ({ data }: TemplateProps) => {
                     <div className="flex justify-between text-muted-foreground"><span>Tax ({safeData.taxRate}%)</span><span>{formatCurrency(taxAmount)}</span></div>
                     <div className="border-t my-2"></div>
                     <div className="flex justify-between font-semibold"><span>Total</span><span>{formatCurrency(total)}</span></div>
-                    <div className="flex justify-between font-semibold text-base text-green-600"><span>Amount Paid</span><span>{formatCurrency(amountPaid)}</span></div>
+                    <div className="flex justify-between font-semibold text-base text-muted-foreground"><span>Amount Paid</span><span>{formatCurrency(amountPaid)}</span></div>
                     <div className="border-t my-2"></div>
                     <div className="flex justify-between font-semibold text-base"><span>Balance Due</span><span>{formatCurrency(balanceDue)}</span></div>
                 </div>

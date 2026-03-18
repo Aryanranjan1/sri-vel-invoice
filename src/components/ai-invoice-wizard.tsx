@@ -4,13 +4,14 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Sparkles, FileText, Trash2, Edit } from 'lucide-react';
+import { Loader2, Sparkles, FileText, Trash2, Edit, MoreHorizontal } from 'lucide-react';
 import { extractInvoiceData } from '@/ai/flows/extract-invoice-data';
 import { type InvoiceFormValues } from '@/types/invoice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { EditableInvoiceForm } from './editable-invoice-form';
 import { cn } from '@/lib/utils';
-
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface AiInvoiceWizardProps {
     invoices: InvoiceFormValues[];
@@ -19,7 +20,6 @@ interface AiInvoiceWizardProps {
     setActiveInvoiceIndex: (index: number | null) => void;
     defaultValues: Partial<InvoiceFormValues>;
 }
-
 
 export function AiInvoiceWizard({ invoices, setInvoices, activeInvoiceIndex, setActiveInvoiceIndex, defaultValues }: AiInvoiceWizardProps) {
   const { toast } = useToast();
@@ -72,7 +72,7 @@ export function AiInvoiceWizard({ invoices, setInvoices, activeInvoiceIndex, set
       });
 
       setInvoices(mappedInvoices);
-      setActiveInvoiceIndex(0); // Select the first invoice by default
+      setActiveInvoiceIndex(0);
 
       toast({
         title: `Extracted ${mappedInvoices.length} invoice(s)!`,
@@ -107,11 +107,36 @@ export function AiInvoiceWizard({ invoices, setInvoices, activeInvoiceIndex, set
     }
   };
 
+  const handleViewAs = (index: number, type: 'invoice' | 'receipt') => {
+    const newInvoices = [...invoices];
+    const invoice = { ...newInvoices[index] };
+
+    invoice.documentType = type;
+
+    if (type === 'receipt') {
+      if (invoice.invoiceNumber.startsWith('INV-')) {
+        invoice.invoiceNumber = invoice.invoiceNumber.replace('INV-', 'REC-');
+      }
+    } else { // type === 'invoice'
+      if (invoice.invoiceNumber.startsWith('REC-')) {
+        invoice.invoiceNumber = invoice.invoiceNumber.replace('REC-', 'INV-');
+      }
+    }
+    
+    newInvoices[index] = invoice;
+    setInvoices(newInvoices);
+    setActiveInvoiceIndex(index);
+    toast({
+      title: `Switched to ${type}`,
+      description: `${invoice.toName || 'Document'} is now a ${type}.`,
+    });
+  };
+
   if (editingIndex !== null) {
     return (
       <div>
         <Button variant="outline" onClick={() => setEditingIndex(null)} className="mb-4">
-            &larr; Back to Invoice List
+            &larr; Back to Document List
         </Button>
         <EditableInvoiceForm
             initialData={invoices[editingIndex]} 
@@ -126,7 +151,7 @@ export function AiInvoiceWizard({ invoices, setInvoices, activeInvoiceIndex, set
         <div className="space-y-2">
             <h3 className="font-semibold text-lg flex items-center gap-2"><Sparkles size={20} className="text-accent"/>AI Natural Language Parser</h3>
             <p className="text-sm text-muted-foreground">
-                Paste your informal chat logs, emails, or fragmented notes. The parser will automatically structure the data into one or more invoices.
+                Paste your informal chat logs, emails, or fragmented notes. The parser will automatically structure the data into one or more documents.
             </p>
         </div>
 
@@ -146,50 +171,67 @@ export function AiInvoiceWizard({ invoices, setInvoices, activeInvoiceIndex, set
         ) : (
             <>
             <Sparkles className="mr-2" />
-            Process & Extract Invoices
+            Process & Extract Documents
             </>
         )}
         </Button>
 
       {invoices.length > 0 && (
-        <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Extracted Invoices</h3>
-            <div className="space-y-3">
-                {invoices.map((invoice, index) => (
-                    <Card 
-                        key={index}
-                        onClick={() => setActiveInvoiceIndex(index)}
-                        className={cn(
-                            "cursor-pointer transition-all",
-                            activeInvoiceIndex === index ? 'border-primary ring-2 ring-primary' : 'border-border hover:border-primary/50'
-                        )}
-                    >
-                        <CardContent className="p-3 flex items-center justify-between">
-                            <div className="font-medium">
-                                <p>{invoice.toName || 'Untitled Invoice'}</p>
-                                <p className="text-xs text-muted-foreground">{invoice.invoiceNumber}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setEditingIndex(index); setActiveInvoiceIndex(index); }}>
-                                    <Edit size={16}/>
+        <Card>
+            <CardHeader>
+                <CardTitle>Extracted Documents</CardTitle>
+                <CardDescription>Review and manage the extracted documents.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                        <TableHead>Client</TableHead>
+                        <TableHead>Current #</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {invoices.map((invoice, index) => (
+                        <TableRow
+                            key={index}
+                            onClick={() => setActiveInvoiceIndex(index)}
+                            className={cn(activeInvoiceIndex === index && 'bg-muted/50', 'cursor-pointer')}
+                        >
+                            <TableCell className="font-medium">{invoice.toName || 'Untitled'}</TableCell>
+                            <TableCell>{invoice.invoiceNumber}</TableCell>
+                            <TableCell className="capitalize">{invoice.documentType}</TableCell>
+                            <TableCell className="text-right">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    {/* Stop propagation to avoid row click handler */}
+                                <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                                    <MoreHorizontal className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={(e) => { e.stopPropagation(); handleRemoveInvoice(index); }}>
-                                    <Trash2 size={16}/>
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-        </div>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleViewAs(index, 'invoice')}>View as Invoice</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleViewAs(index, 'receipt')}>View as Receipt</DropdownMenuItem>
+                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingIndex(index); setActiveInvoiceIndex(index); }}>Edit</DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); handleRemoveInvoice(index);}}>Delete</DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            </TableCell>
+                        </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
       )}
 
       {invoices.length === 0 && !isLoading && (
         <div className="text-center py-12 border-2 border-dashed rounded-lg">
             <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 text-lg font-medium">Invoices will appear here</h3>
+            <h3 className="mt-4 text-lg font-medium">Documents will appear here</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-                Your extracted invoices will be listed here to edit and review.
+                Your extracted documents will be listed here to edit and review.
             </p>
         </div>
       )}
