@@ -45,7 +45,7 @@ export default function InvoicePage() {
     discountRate: 0,
     paymentDetails: {
       bankName: 'MAYBANK',
-      accountName: 'SRI VELS CATERING & TRANSPORTATION',
+      accountName: 'SRI VELS CATERING',
       accountNumber: '555015029067',
       paymentMethod: 'Bank Transfer',
     },
@@ -370,7 +370,7 @@ export default function InvoicePage() {
                   <CheckCircle2 size={14} className="text-green-500"/> Auto-saved
               </div>
           </div>
-          <div className="bg-card rounded-lg shadow-lg p-4">
+          <div className="bg-card rounded-lg shadow-lg">
               <div ref={invoicePreviewRef}>
                 {previewData ? (
                   <InvoicePreview data={previewData} />
