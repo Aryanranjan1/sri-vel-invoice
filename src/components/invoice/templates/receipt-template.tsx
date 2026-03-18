@@ -19,9 +19,8 @@ export const ReceiptTemplate = ({ data }: TemplateProps) => {
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
     
-    // If amountPaid is not a valid, positive number, default it to the total for the receipt.
-    const parsedAmountPaid = Number(data.amountPaid);
-    const amountPaid = !isNaN(parsedAmountPaid) && parsedAmountPaid > 0 ? parsedAmountPaid : total;
+    const parsedAmountPaid = typeof data.amountPaid === 'number' ? data.amountPaid : 0;
+    const amountPaid = parsedAmountPaid > 0 ? parsedAmountPaid : total;
     const balanceDue = total - amountPaid;
 
 

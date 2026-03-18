@@ -18,7 +18,7 @@ export const EditorialReceiptTemplate = ({ data }: TemplateProps) => {
     const subtotalAfterDiscount = subtotal - discountAmount;
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
-    const amountPaid = Number(data.amountPaid) || 0;
+    const amountPaid = typeof data.amountPaid === 'number' ? data.amountPaid : 0;
     const balanceDue = total - amountPaid;
 
     const formatCurrency = (amount: number | string) => {
@@ -127,7 +127,7 @@ export const EditorialReceiptTemplate = ({ data }: TemplateProps) => {
                         <span>Total</span>
                         <span>{formatCurrency(total)}</span>
                     </div>
-                    <div className="flex justify-between items-center p-3 mt-2 bg-green-600 text-white rounded-md">
+                    <div className="flex justify-between items-center p-3 mt-2 bg-muted text-muted-foreground rounded-md">
                         <span className="font-extrabold text-base uppercase">Amount Paid</span>
                         <span className="font-extrabold text-base">{formatCurrency(amountPaid)}</span>
                     </div>

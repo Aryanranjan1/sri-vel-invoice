@@ -18,7 +18,7 @@ export const SriVelsReceiptTemplate = ({ data }: TemplateProps) => {
     const subtotalAfterDiscount = subtotal - discountAmount;
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
-    const amountPaid = Number(data.amountPaid) || 0;
+    const amountPaid = typeof data.amountPaid === 'number' ? data.amountPaid : 0;
     const balanceDue = total - amountPaid;
 
     const formatCurrency = (amount: number | string) => {
@@ -129,7 +129,7 @@ export const SriVelsReceiptTemplate = ({ data }: TemplateProps) => {
                             <td className="py-2 border-t border-border">Total</td>
                             <td className='text-right border-t border-border'>{formatCurrency(total)}</td>
                         </tr>
-                        <tr className="font-bold text-base text-green-600">
+                        <tr className="font-bold text-base text-muted-foreground">
                             <td className="py-2">Amount Paid</td>
                             <td className='text-right'>{formatCurrency(amountPaid)}</td>
                         </tr>
