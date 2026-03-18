@@ -5,6 +5,7 @@ import { type InvoiceFormValues } from '@/types/invoice';
 import { DefaultTemplate } from './invoice/templates/default-template';
 import { SriVelsTemplate } from './invoice/templates/sri-vels-template';
 import { EditorialTemplate } from './invoice/templates/editorial-template';
+import { ReceiptTemplate } from './invoice/templates/receipt-template';
 
 type InvoicePreviewProps = {
   data: InvoiceFormValues;
@@ -14,6 +15,10 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
   ({ data }, ref) => {
     
     const renderTemplate = () => {
+      if (data.documentType === 'receipt') {
+        return <ReceiptTemplate data={data} />;
+      }
+      
       switch (data.template) {
         case 'sri-vels':
           return <SriVelsTemplate data={data} />;
@@ -26,13 +31,13 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
     };
 
     return (
-        <div ref={ref} className="bg-card shadow-lg rounded-lg">
-            <div className='p-4 sm:p-6 md:p-10'>
-                <div className="aspect-[210/297] flex flex-col">
-                    {renderTemplate()}
-                </div>
+      <div ref={ref} className="bg-card shadow-lg rounded-lg">
+        <div className='p-4 sm:p-6 md:p-10'>
+            <div className="aspect-[210/297] flex flex-col">
+                {renderTemplate()}
             </div>
         </div>
+      </div>
     );
   }
 );

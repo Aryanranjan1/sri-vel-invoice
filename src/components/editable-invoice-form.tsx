@@ -50,6 +50,7 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
     return () => subscription.unsubscribe();
   }, [form, onUpdate]);
 
+  const watchedDocType = form.watch('documentType');
   const invoiceDate = form.watch('invoiceDate');
   
   return (
@@ -59,10 +60,31 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
             {/* Section: Document */}
             <div className="space-y-4">
                 <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Document</h3>
+                <FormField
+                  control={form.control}
+                  name="documentType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Document Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a document type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="invoice">Invoice</SelectItem>
+                          <SelectItem value="receipt">Receipt</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="invoiceNumber" render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Invoice Number</FormLabel>
+                            <FormLabel>{watchedDocType === 'invoice' ? 'Invoice' : 'Receipt'} Number</FormLabel>
                             <FormControl><Input {...field} value={field.value ?? ''}/></FormControl>
                             <FormMessage />
                         </FormItem>
@@ -93,7 +115,7 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="invoiceDate" render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Date</FormLabel>
+                            <FormLabel>{watchedDocType === 'invoice' ? 'Invoice' : 'Receipt'} Date</FormLabel>
                             <Popover>
                                 <PopoverTrigger asChild>
                                 <FormControl>
@@ -110,25 +132,35 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
                             <FormMessage />
                         </FormItem>
                     )} />
-                    <FormField control={form.control} name="dueDate" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Due Date</FormLabel>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                <FormControl>
-                                    <Button variant={'secondary'} className={cn('w-full justify-start text-left font-normal', !field.value && 'text-muted-foreground')}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
-                                    </Button>
-                                </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < invoiceDate} initialFocus />
-                                </PopoverContent>
-                            </Popover>
+                    {watchedDocType === 'invoice' ? (
+                      <FormField control={form.control} name="dueDate" render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>Due Date</FormLabel>
+                              <Popover>
+                                  <PopoverTrigger asChild>
+                                  <FormControl>
+                                      <Button variant={'secondary'} className={cn('w-full justify-start text-left font-normal', !field.value && 'text-muted-foreground')}>
+                                          <CalendarIcon className="mr-2 h-4 w-4" />
+                                          {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                                      </Button>
+                                  </FormControl>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < invoiceDate} initialFocus />
+                                  </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                          </FormItem>
+                      )} />
+                    ) : (
+                      <FormField control={form.control} name="amountPaid" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Amount Paid</FormLabel>
+                            <FormControl><Input type="number" placeholder="0.00" {...field} value={field.value ?? ''} /></FormControl>
                             <FormMessage />
-                        </FormItem>
-                    )} />
+                          </FormItem>
+                        )} />
+                    )}
                 </div>
             </div>
 

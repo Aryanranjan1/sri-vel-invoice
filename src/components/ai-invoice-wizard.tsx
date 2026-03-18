@@ -56,6 +56,7 @@ export function AiInvoiceWizard({ invoices, setInvoices, activeInvoiceIndex, set
 
         return {
           ...(defaultValues as InvoiceFormValues),
+          documentType: 'invoice',
           template: 'default',
           invoiceNumber: `INV-${String(Date.now()).slice(-6)}-${index}`,
           toName: extracted.clientName || '',

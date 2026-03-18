@@ -28,6 +28,7 @@ export default function InvoicePage() {
   const invoicePreviewRef = useRef<HTMLDivElement>(null);
 
   const defaultValues: Partial<InvoiceFormValues> = {
+    documentType: 'invoice',
     template: 'editorial',
     invoiceNumber: `INV-${String(Date.now()).slice(-6)}`,
     fromName: 'SRI VELS CATERING & TRANSPORTATION',
@@ -62,6 +63,7 @@ export default function InvoicePage() {
     control: manualForm.control,
   });
 
+  const watchedDocType = manualForm.watch('documentType');
   const invoiceDate = manualForm.watch('invoiceDate');
 
   const watchedManualData = manualForm.watch();
@@ -81,14 +83,14 @@ export default function InvoicePage() {
       toast({
         variant: 'destructive',
         title: 'Preview Not Found',
-        description: 'Cannot download invoice because the preview is not available.',
+        description: 'Cannot download document because the preview is not available.',
       });
       return;
     }
 
     toast({
       title: 'Generating PDF...',
-      description: 'Your invoice is being prepared for download.',
+      description: `Your ${previewData.documentType} is being prepared for download.`,
     });
 
     try {
@@ -115,14 +117,14 @@ export default function InvoicePage() {
       const xOffset = (pdfWidth - imgWidth) / 2;
 
       pdf.addImage(imgData, 'PNG', xOffset, 0, imgWidth, imgHeight);
-      pdf.save(`invoice-${previewData.invoiceNumber || 'download'}.pdf`);
+      pdf.save(`${previewData.documentType}-${previewData.invoiceNumber || 'download'}.pdf`);
 
       toast({
         title: 'Download Started!',
-        description: 'Your invoice PDF has been successfully generated.',
+        description: `Your ${previewData.documentType} PDF has been successfully generated.`,
       });
     } catch (error) {
-      console.error("Failed to download invoice:", error);
+      console.error(`Failed to download ${previewData.documentType}:`, error);
       toast({
         variant: 'destructive',
         title: 'Download Failed',
@@ -136,12 +138,11 @@ export default function InvoicePage() {
     setActiveAiInvoiceIndex(null); 
   };
 
-
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <header className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-12">
         <div className="text-center sm:text-left">
-          <h1 className="text-xl font-semibold tracking-tight">Sri Vels <span className="text-muted-foreground font-normal">/ Invoice</span></h1>
+          <h1 className="text-xl font-semibold tracking-tight">Sri Vels <span className="text-muted-foreground font-normal">/ Invoice & Receipt</span></h1>
         </div>
         
         <div className="bg-secondary p-1 rounded-lg inline-flex items-center justify-center mx-auto sm:mx-0">
@@ -181,10 +182,31 @@ export default function InvoicePage() {
               {/* Section: Document */}
               <div className="space-y-4">
                   <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Document</h3>
+                  <FormField
+                    control={manualForm.control}
+                    name="documentType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Document Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a document type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="invoice">Invoice</SelectItem>
+                            <SelectItem value="receipt">Receipt</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={manualForm.control} name="invoiceNumber" render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Invoice Number</FormLabel>
+                            <FormLabel>{watchedDocType === 'invoice' ? 'Invoice' : 'Receipt'} Number</FormLabel>
                             <FormControl><Input {...field} value={field.value ?? ''}/></FormControl>
                             <FormMessage />
                         </FormItem>
@@ -215,7 +237,7 @@ export default function InvoicePage() {
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField control={manualForm.control} name="invoiceDate" render={({ field }) => (
                           <FormItem>
-                              <FormLabel>Date</FormLabel>
+                              <FormLabel>{watchedDocType === 'invoice' ? 'Invoice' : 'Receipt'} Date</FormLabel>
                               <Popover>
                                   <PopoverTrigger asChild>
                                   <FormControl>
@@ -232,25 +254,35 @@ export default function InvoicePage() {
                               <FormMessage />
                           </FormItem>
                       )} />
-                      <FormField control={manualForm.control} name="dueDate" render={({ field }) => (
+                      {watchedDocType === 'invoice' ? (
+                        <FormField control={manualForm.control} name="dueDate" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Due Date</FormLabel>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button variant={'secondary'} className={cn('w-full justify-start text-left font-normal', !field.value && 'text-muted-foreground')}>
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                                        </Button>
+                                    </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < invoiceDate} initialFocus />
+                                    </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                      ) : (
+                        <FormField control={manualForm.control} name="amountPaid" render={({ field }) => (
                           <FormItem>
-                              <FormLabel>Due Date</FormLabel>
-                              <Popover>
-                                  <PopoverTrigger asChild>
-                                  <FormControl>
-                                      <Button variant={'secondary'} className={cn('w-full justify-start text-left font-normal', !field.value && 'text-muted-foreground')}>
-                                      <CalendarIcon className="mr-2 h-4 w-4" />
-                                      {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
-                                      </Button>
-                                  </FormControl>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0" align="start">
-                                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < invoiceDate} initialFocus />
-                                  </PopoverContent>
-                              </Popover>
-                              <FormMessage />
+                            <FormLabel>Amount Paid</FormLabel>
+                            <FormControl><Input type="number" placeholder="0.00" {...field} value={field.value ?? ''} /></FormControl>
+                            <FormMessage />
                           </FormItem>
-                      )} />
+                        )} />
+                      )}
                   </div>
               </div>
       
@@ -377,7 +409,7 @@ export default function InvoicePage() {
                 ) : (
                   <div className="aspect-[210/297] flex items-center justify-center text-center text-muted-foreground bg-secondary/30 rounded-md">
                     <div className="space-y-2">
-                        <h3 className="font-semibold text-lg">No invoice to preview</h3>
+                        <h3 className="font-semibold text-lg">No document to preview</h3>
                         <p className="text-sm">
                           {mode === 'ai' 
                             ? 'Extract invoices with AI to see a preview.' 

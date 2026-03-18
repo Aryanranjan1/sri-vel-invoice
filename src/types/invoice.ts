@@ -19,8 +19,9 @@ export const lineItemSchema = z.object({
 });
 
 export const invoiceFormSchema = z.object({
-  template: z.enum(['default', 'sri-vels', 'editorial']).default('default'),
-  invoiceNumber: z.string().min(1, 'Invoice number is required'),
+  documentType: z.enum(['invoice', 'receipt']).default('invoice'),
+  template: z.enum(['default', 'sri-vels', 'editorial']).default('editorial'),
+  invoiceNumber: z.string().min(1, 'Number is required'),
   fromName: z.string().min(1, '"From" name is required'),
   fromRegNo: z.string().optional(),
   fromEmail: z.string().email().optional().or(z.literal('')),
@@ -28,8 +29,9 @@ export const invoiceFormSchema = z.object({
   toName: z.string().min(1, '"To" name is required'),
   toEmail: z.string().email().optional().or(z.literal('')),
   toAddress: z.string().min(1, '"To" address is required'),
-  invoiceDate: z.date({ required_error: "Invoice date is required." }),
-  dueDate: z.date({ required_error: "Due date is required." }),
+  invoiceDate: z.date({ required_error: "Date is required." }),
+  dueDate: z.date().optional(),
+  amountPaid: z.coerce.number().optional(),
   items: z.array(lineItemSchema).min(1, 'Please add at least one item.'),
   notes: z.string().optional(),
   taxRate: z.coerce.number().min(0).max(100).optional().default(0),
