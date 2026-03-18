@@ -116,26 +116,23 @@ export default function InvoicePage() {
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
       
-      // Calculate the aspect ratio
+      // Calculate aspect ratio of the captured image
       const ratio = canvasWidth / canvasHeight;
-      
-      const pdfImageWidth = pdfWidth;
-      const pdfImageHeight = pdfImageWidth / ratio;
 
-      let heightLeft = pdfImageHeight;
-      let position = 0;
+      let finalWidth = pdfWidth;
+      let finalHeight = pdfWidth / ratio;
 
-      // Add the first page
-      pdf.addImage(imgData, 'PNG', 0, position, pdfImageWidth, pdfImageHeight);
-      heightLeft -= pdfHeight;
-
-      // Add new pages if content is taller than one page
-      while (heightLeft > 0) {
-        position -= pdfHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfImageWidth, pdfImageHeight);
-        heightLeft -= pdfHeight;
+      // If the content is too tall, fit it to the page height and adjust width proportionally
+      if (finalHeight > pdfHeight) {
+        finalHeight = pdfHeight;
+        finalWidth = pdfHeight * ratio;
       }
+      
+      // Center the image on the PDF page
+      const xOffset = (pdfWidth - finalWidth) / 2;
+      const yOffset = (pdfHeight - finalHeight) / 2;
+
+      pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
 
       pdf.save(`${previewData.documentType}-${previewData.invoiceNumber || 'download'}.pdf`);
 
@@ -427,7 +424,7 @@ export default function InvoicePage() {
                 {previewData ? (
                   <InvoicePreview data={previewData} />
                 ) : (
-                  <div className="aspect-[210/297] flex items-center justify-center text-center text-muted-foreground bg-secondary/30 rounded-md">
+                  <div className="flex items-center justify-center text-center text-muted-foreground bg-secondary/30 rounded-md" style={{ aspectRatio: '210/297' }}>
                     <div className="space-y-2">
                         <h3 className="font-semibold text-lg">No document to preview</h3>
                         <p className="text-sm">
