@@ -43,7 +43,7 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
     return (
       <div ref={ref} className="bg-card shadow-lg rounded-lg">
         <div className='p-4 sm:p-6 md:p-10'>
-            <div className="aspect-[210/297] flex flex-col bg-white">
+            <div data-invoice-paper className="w-full flex flex-col bg-white">
                 {renderTemplate()}
             </div>
         </div>

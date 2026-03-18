@@ -80,7 +80,9 @@ export default function InvoicePage() {
   }
 
   const handleDownload = async () => {
-    if (!invoicePreviewRef.current || !previewData) {
+    const paperElement = invoicePreviewRef.current?.querySelector<HTMLDivElement>('[data-invoice-paper]');
+
+    if (!paperElement || !previewData) {
       toast({
         variant: 'destructive',
         title: 'Preview Not Found',
@@ -95,29 +97,46 @@ export default function InvoicePage() {
     });
 
     try {
-      const canvas = await html2canvas(invoicePreviewRef.current, {
-        scale: 2.5,
+      const canvas = await html2canvas(paperElement, {
+        scale: 2, // A good scale for quality.
         useCORS: true,
         logging: false,
       });
 
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdf = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4',
+      });
+      
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      const canvasAspectRatio = canvas.width / canvas.height;
-      let imgWidth = pdfWidth;
-      let imgHeight = pdfWidth / canvasAspectRatio;
-
-      if (imgHeight > pdfHeight) {
-          imgHeight = pdfHeight;
-          imgWidth = pdfHeight * canvasAspectRatio;
-      }
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
       
-      const xOffset = (pdfWidth - imgWidth) / 2;
+      // Calculate the aspect ratio
+      const ratio = canvasWidth / canvasHeight;
+      
+      const pdfImageWidth = pdfWidth;
+      const pdfImageHeight = pdfImageWidth / ratio;
 
-      pdf.addImage(imgData, 'PNG', xOffset, 0, imgWidth, imgHeight);
+      let heightLeft = pdfImageHeight;
+      let position = 0;
+
+      // Add the first page
+      pdf.addImage(imgData, 'PNG', 0, position, pdfImageWidth, pdfImageHeight);
+      heightLeft -= pdfHeight;
+
+      // Add new pages if content is taller than one page
+      while (heightLeft > 0) {
+        position -= pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfImageWidth, pdfImageHeight);
+        heightLeft -= pdfHeight;
+      }
+
       pdf.save(`${previewData.documentType}-${previewData.invoiceNumber || 'download'}.pdf`);
 
       toast({
