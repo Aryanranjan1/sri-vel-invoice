@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Sparkles, FileText, Trash2, Edit, MoreHorizontal } from 'lucide-react';
+import { Loader2, Sparkles, FileText, MoreHorizontal } from 'lucide-react';
 import { extractInvoiceData } from '@/ai/flows/extract-invoice-data';
 import { type InvoiceFormValues } from '@/types/invoice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -57,7 +57,7 @@ export function AiInvoiceWizard({ invoices, setInvoices, activeInvoiceIndex, set
         return {
           ...(defaultValues as InvoiceFormValues),
           documentType: 'invoice',
-          template: 'default',
+          template: 'editorial',
           invoiceNumber: `INV-${String(Date.now()).slice(-6)}-${index}`,
           toName: extracted.clientName || '',
           notes: [extracted.title, extracted.notes].filter(Boolean).join('\n\n') || defaultValues.notes || '',

@@ -184,7 +184,7 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
                         <FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="Your Company" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="fromRegNo" render={({ field }) => (
-                        <FormItem><FormLabel>Reg. No</FormLabel><FormControl><Input placeholder="Registration No." {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Reg. No.</FormLabel><FormControl><Input placeholder="Registration No." {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                  </div>
                  <FormField control={form.control} name="fromAddress" render={({ field }) => (
