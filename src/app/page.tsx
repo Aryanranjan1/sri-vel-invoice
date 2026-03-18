@@ -44,6 +44,7 @@ export default function InvoicePage() {
     notes: 'Thank you for your business.\n\nPayment due within 7 days.',
     taxRate: 0,
     discountRate: 0,
+    amountPaid: 0,
     paymentDetails: {
       bankName: 'MAYBANK',
       accountName: 'SRI VELS CATERING',

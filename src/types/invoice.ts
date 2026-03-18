@@ -31,7 +31,7 @@ export const invoiceFormSchema = z.object({
   toAddress: z.string().min(1, '"To" address is required'),
   invoiceDate: z.date({ required_error: "Date is required." }),
   dueDate: z.date().optional(),
-  amountPaid: z.coerce.number().optional(),
+  amountPaid: z.coerce.number().optional().default(0),
   items: z.array(lineItemSchema).min(1, 'Please add at least one item.'),
   notes: z.string().optional(),
   taxRate: z.coerce.number().min(0).max(100).optional().default(0),
