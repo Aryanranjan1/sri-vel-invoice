@@ -8,7 +8,7 @@ import { AiInvoiceWizard } from '@/components/ai-invoice-wizard';
 import { InvoicePreview } from '@/components/invoice-preview';
 import { type InvoiceFormValues, invoiceFormSchema } from '@/types/invoice';
 import { Button } from '@/components/ui/button';
-import { Bot, File as FileIcon, Download, CheckCircle2, Plus, Trash2 } from 'lucide-react';
+import { Bot, Download, CheckCircle2, Plus, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -28,25 +28,25 @@ export default function InvoicePage() {
   const invoicePreviewRef = useRef<HTMLDivElement>(null);
 
   const defaultValues: Partial<InvoiceFormValues> = {
-    template: 'default',
+    template: 'editorial',
     invoiceNumber: `INV-${String(Date.now()).slice(-6)}`,
-    fromName: 'Your Company',
-    fromRegNo: '',
+    fromName: 'SRI VELS CATERING & TRANSPORTATION',
+    fromRegNo: '202503053810 (JR0174329-K)',
     fromEmail: '',
-    fromAddress: '123 Main St\nAnytown, USA 12345',
+    fromAddress: '6580 SEMPADAN KG DATO MANSU GPASIR RASAH SEREMBAN\n70300 SEREMBAN, NEGERI SEMBILAN',
     toName: '',
     toEmail: '',
     toAddress: '',
     invoiceDate: new Date(),
-    dueDate: new Date(new Date().setDate(new Date().getDate() + 30)),
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 7)),
     items: [{ description: '', quantity: 1, price: 0 }],
-    notes: 'Thank you for your business.',
+    notes: 'Thank you for your business.\n\nPayment due within 7 days.',
     taxRate: 0,
     discountRate: 0,
     paymentDetails: {
-      bankName: 'Bank Name',
-      accountName: 'Account Name',
-      accountNumber: '1234567890',
+      bankName: 'MAYBANK',
+      accountName: 'SRI VELS CATERING & TRANSPORTATION',
+      accountNumber: '555015029067',
       paymentMethod: 'Bank Transfer',
     },
   };
@@ -131,6 +131,12 @@ export default function InvoicePage() {
     }
   };
 
+  const switchMode = (selectedMode: 'manual' | 'ai') => {
+    setMode(selectedMode);
+    setActiveAiInvoiceIndex(null); 
+  };
+
+
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <header className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-12">
@@ -140,7 +146,7 @@ export default function InvoicePage() {
         
         <div className="bg-secondary p-1 rounded-lg inline-flex items-center justify-center mx-auto sm:mx-0">
             <button 
-              onClick={() => setMode('manual')}
+              onClick={() => switchMode('manual')}
               className={cn(
                 "px-4 py-1.5 text-sm font-medium rounded-md transition-colors",
                 mode === 'manual' ? 'bg-background text-primary shadow-sm' : 'bg-transparent text-secondary-foreground'
@@ -149,7 +155,7 @@ export default function InvoicePage() {
               Manual
             </button>
             <button 
-              onClick={() => setMode('ai')}
+              onClick={() => switchMode('ai')}
               className={cn(
                 "px-4 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-2",
                 mode === 'ai' ? 'bg-background text-primary shadow-sm' : 'bg-transparent text-secondary-foreground'
@@ -371,9 +377,8 @@ export default function InvoicePage() {
                 ) : (
                   <div className="aspect-[210/297] flex items-center justify-center text-center text-muted-foreground bg-secondary/30 rounded-md">
                     <div className="space-y-2">
-                        <FileIcon className="mx-auto h-12 w-12" />
-                        <p className="font-medium">No invoice to display</p>
-                        <p className="text-xs">
+                        <h3 className="font-semibold text-lg">No invoice to preview</h3>
+                        <p className="text-sm">
                           {mode === 'ai' 
                             ? 'Extract invoices with AI to see a preview.' 
                             : 'Fill out the form to see a preview.'
