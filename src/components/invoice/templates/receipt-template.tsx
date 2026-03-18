@@ -19,8 +19,7 @@ export const ReceiptTemplate = ({ data }: TemplateProps) => {
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
     
-    // If amountPaid is provided (even 0), use it. Otherwise, default to the total.
-    const amountPaid = typeof data.amountPaid === 'number' ? data.amountPaid : total;
+    const amountPaid = (typeof data.amountPaid === 'number' && !isNaN(data.amountPaid)) ? data.amountPaid : total;
     const balanceDue = total - amountPaid;
 
     const formatCurrency = (amount: number | string) => {
@@ -37,8 +36,7 @@ export const ReceiptTemplate = ({ data }: TemplateProps) => {
         toName: data.toName || 'Client Company',
         toAddress: data.toAddress || '456 Client Ave, Anytown, USA',
         invoiceDate: data.invoiceDate || new Date(),
-        // Only show the example item if the items array is truly empty.
-        items: data.items.length > 0 
+        items: data.items.length > 0 && data.items.some(i => i.description) 
             ? data.items 
             : [{description: 'Example Item', quantity: 1, price: 100}],
     };
@@ -115,14 +113,8 @@ export const ReceiptTemplate = ({ data }: TemplateProps) => {
             </div>
 
             {/* Footer */}
-            <footer className="mt-12 md:mt-16 pt-6 md:pt-8 border-t text-muted-foreground text-[0.9em]">
-                {safeData.notes && (
-                   <>
-                        <h4 className="font-semibold text-primary mb-2">Notes</h4>
-                        <p className="whitespace-pre-line">{safeData.notes}</p>
-                   </>
-                )}
-                 <p className='mt-4'>Thank you for your business!</p>
+            <footer className="mt-auto pt-6 md:pt-8 border-t text-muted-foreground text-[0.9em]">
+                <p>Thank you for your business!</p>
             </footer>
         </div>
     );

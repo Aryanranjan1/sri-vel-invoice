@@ -19,8 +19,7 @@ export const EditorialReceiptTemplate = ({ data }: TemplateProps) => {
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
 
-    // If amountPaid is provided (even 0), use it. Otherwise, default to the total.
-    const amountPaid = typeof data.amountPaid === 'number' ? data.amountPaid : total;
+    const amountPaid = (typeof data.amountPaid === 'number' && !isNaN(data.amountPaid)) ? data.amountPaid : total;
     const balanceDue = total - amountPaid;
 
     const formatCurrency = (amount: number | string) => {
@@ -37,8 +36,7 @@ export const EditorialReceiptTemplate = ({ data }: TemplateProps) => {
         toName: data.toName || 'Client Company',
         toAddress: data.toAddress || '456 Client Ave, Anytown, USA',
         invoiceDate: data.invoiceDate || new Date(),
-        // Only show the example item if the items array is truly empty.
-        items: data.items.length > 0 
+        items: data.items.length > 0 && data.items.some(i => i.description)
             ? data.items 
             : [{description: 'Example Item', quantity: 1, price: 100}],
     };
@@ -144,7 +142,7 @@ export const EditorialReceiptTemplate = ({ data }: TemplateProps) => {
             {/* Footer */}
             <footer className="mt-auto pt-8 border-t-2 border-primary">
                  <div className="text-muted-foreground text-sm whitespace-pre-line">
-                    {safeData.notes}
+                    Thank you for your business.
                 </div>
             </footer>
         </div>
