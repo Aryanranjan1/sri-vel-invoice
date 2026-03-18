@@ -19,7 +19,9 @@ export const EditorialReceiptTemplate = ({ data }: TemplateProps) => {
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
 
-    const amountPaid = (typeof data.amountPaid === 'number' && !isNaN(data.amountPaid)) ? data.amountPaid : total;
+    const amountPaid = (data.amountPaid !== undefined && data.amountPaid !== null && !isNaN(Number(data.amountPaid)) && String(data.amountPaid).trim() !== '')
+        ? Number(data.amountPaid)
+        : total;
     const balanceDue = total - amountPaid;
 
     const formatCurrency = (amount: number | string) => {
@@ -38,7 +40,7 @@ export const EditorialReceiptTemplate = ({ data }: TemplateProps) => {
         invoiceDate: data.invoiceDate || new Date(),
         items: data.items.length > 0 && data.items.some(i => i.description)
             ? data.items 
-            : [{description: 'Example Item', quantity: 1, price: 100}],
+            : [],
     };
 
     return (
