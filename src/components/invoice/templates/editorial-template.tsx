@@ -128,6 +128,12 @@ export const EditorialTemplate = ({ data }: TemplateProps) => {
                             <span className="font-semibold">-{formatCurrency(discountAmount)}</span>
                         </div>
                     )}
+                    {data.depositStatus === 'due' && depositAmount > 0 && (
+                        <div className="flex justify-between py-2 border-b border-border/50 text-sm">
+                            <span className="text-muted-foreground">Deposit Due</span>
+                            <span className="font-normal">{formatCurrency(depositAmount)}</span>
+                        </div>
+                    )}
                     <div className="flex justify-between py-2 border-b border-border/50 text-sm">
                         <span className="text-muted-foreground">Tax ({safeData.taxRate}%)</span>
                         <span className="font-semibold">{formatCurrency(taxAmount)}</span>
@@ -148,11 +154,6 @@ export const EditorialTemplate = ({ data }: TemplateProps) => {
                         <span className="font-extrabold text-base uppercase">Balance Due</span>
                         <span className="font-extrabold text-base">{formatCurrency(balanceDue)}</span>
                     </div>
-                    {data.depositStatus === 'due' && depositAmount > 0 && (
-                        <div className="mt-2 text-sm text-muted-foreground text-right">
-                           A deposit of {formatCurrency(depositAmount)} is due.
-                        </div>
-                    )}
                 </div>
             </div>
 

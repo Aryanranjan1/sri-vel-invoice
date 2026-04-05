@@ -110,11 +110,18 @@ export const DefaultTemplate = ({ data }: TemplateProps) => {
                     <div className="flex justify-between text-muted-foreground"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
                     {safeData.discountRate > 0 && <div className="flex justify-between text-muted-foreground"><span>Discount ({safeData.discountRate}%)</span><span>-{formatCurrency(discountAmount)}</span></div>}
                     
+                    {data.depositStatus === 'due' && depositAmount > 0 && (
+                        <div className="flex justify-between text-muted-foreground">
+                            <span>Deposit Due</span>
+                            <span className='font-normal'>{formatCurrency(depositAmount)}</span>
+                        </div>
+                    )}
+
                     <div className="flex justify-between text-muted-foreground"><span>Tax ({safeData.taxRate}%)</span><span>{formatCurrency(taxAmount)}</span></div>
                     
                     <div className="border-t my-2"></div>
 
-                    <div className="flex justify-between font-semibold"><span>Total</span><span>{formatCurrency(total)}</span></div>
+                    <div className="flex justify-between font-semibold"><span>Grand Total</span><span>{formatCurrency(total)}</span></div>
                     
                     {data.depositStatus === 'paid' && depositAmount > 0 && (
                         <div className="flex justify-between text-muted-foreground">
@@ -129,12 +136,6 @@ export const DefaultTemplate = ({ data }: TemplateProps) => {
                         <span>Balance Due</span>
                         <span>{formatCurrency(balanceDue)}</span>
                     </div>
-
-                    {data.depositStatus === 'due' && depositAmount > 0 && (
-                        <div className="text-right text-muted-foreground pt-1">
-                            A deposit of {formatCurrency(depositAmount)} is due.
-                        </div>
-                    )}
                 </div>
             </div>
 

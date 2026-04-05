@@ -123,7 +123,7 @@ export const SriVelsTemplate = ({ data }: TemplateProps) => {
                     <tbody>
                         <tr>
                             <td className="py-2 text-muted-foreground">Subtotal</td>
-                            <td id="subtotalAmount" className='text-right font-semibold'>{formatCurrency(subtotal)}</td>
+                            <td className='text-right font-semibold'>{formatCurrency(subtotal)}</td>
                         </tr>
                          {safeData.discountRate > 0 && (
                             <tr>
@@ -131,9 +131,15 @@ export const SriVelsTemplate = ({ data }: TemplateProps) => {
                                 <td className='text-right font-semibold'>-{formatCurrency(discountAmount)}</td>
                             </tr>
                         )}
+                        {data.depositStatus === 'due' && depositAmount > 0 && (
+                            <tr>
+                                <td className="py-2 text-muted-foreground">Deposit Due</td>
+                                <td className='text-right font-normal'>{formatCurrency(depositAmount)}</td>
+                            </tr>
+                        )}
                         <tr>
                             <td className="py-2 text-muted-foreground">Tax ({safeData.taxRate}%)</td>
-                            <td id="taxAmount" className='text-right font-semibold'>{formatCurrency(taxAmount)}</td>
+                            <td className='text-right font-semibold'>{formatCurrency(taxAmount)}</td>
                         </tr>
                         
                         <tr className="font-semibold">
@@ -150,15 +156,8 @@ export const SriVelsTemplate = ({ data }: TemplateProps) => {
 
                         <tr className="font-bold text-base">
                             <td className="py-3 border-y-2 border-primary">Balance Due</td>
-                            <td id="grandTotalAmount" className='text-right border-y-2 border-primary'>{formatCurrency(balanceDue)}</td>
+                            <td className='text-right border-y-2 border-primary'>{formatCurrency(balanceDue)}</td>
                         </tr>
-                         {data.depositStatus === 'due' && depositAmount > 0 && (
-                            <tr>
-                                <td colSpan={2} className="pt-2 text-right text-muted-foreground text-sm">
-                                   A deposit of {formatCurrency(depositAmount)} is due.
-                                </td>
-                            </tr>
-                        )}
                     </tbody>
                 </table>
             </div>
