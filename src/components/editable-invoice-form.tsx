@@ -47,15 +47,16 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
     const subscription = form.watch((value, { name, type }) => {
       const newValues = value as InvoiceFormValues;
       if (name === 'documentType' && type === 'change') {
+        const currentNumber = newValues.invoiceNumber || '';
+        let newNumber = currentNumber;
         if (newValues.documentType === 'receipt') {
-          if (newValues.invoiceNumber.startsWith('INV-')) {
-            form.setValue('invoiceNumber', newValues.invoiceNumber.replace('INV-', 'REC-'));
-          }
-        } else {
-          if (newValues.invoiceNumber.startsWith('REC-')) {
-            form.setValue('invoiceNumber', newValues.invoiceNumber.replace('REC-', 'INV-'));
-          }
+          newNumber = currentNumber.replace('INV-', 'REC-').replace('DEP-', 'REC-');
+        } else if (newValues.documentType === 'deposit') {
+          newNumber = currentNumber.replace('INV-', 'DEP-').replace('REC-', 'DEP-');
+        } else { // invoice
+          newNumber = currentNumber.replace('REC-', 'INV-').replace('DEP-', 'INV-');
         }
+        form.setValue('invoiceNumber', newNumber);
       }
       onUpdate(newValues);
     });
@@ -64,6 +65,15 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
 
   const watchedDocType = form.watch('documentType');
   const invoiceDate = form.watch('invoiceDate');
+
+  const getDocumentTypeLabel = (docType: string) => {
+    switch(docType) {
+      case 'invoice': return 'Invoice';
+      case 'receipt': return 'Receipt';
+      case 'deposit': return 'Deposit';
+      default: return 'Document';
+    }
+  }
   
   return (
     <div className="space-y-8">
@@ -87,6 +97,7 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
                         <SelectContent>
                           <SelectItem value="invoice">Invoice</SelectItem>
                           <SelectItem value="receipt">Receipt</SelectItem>
+                          <SelectItem value="deposit">Deposit</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -96,7 +107,7 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="invoiceNumber" render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{watchedDocType === 'invoice' ? 'Invoice' : 'Receipt'} Number</FormLabel>
+                            <FormLabel>{getDocumentTypeLabel(watchedDocType)} Number</FormLabel>
                             <FormControl><Input {...field} value={field.value ?? ''}/></FormControl>
                             <FormMessage />
                         </FormItem>
@@ -127,7 +138,7 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="invoiceDate" render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{watchedDocType === 'invoice' ? 'Invoice' : 'Receipt'} Date</FormLabel>
+                            <FormLabel>{getDocumentTypeLabel(watchedDocType)} Date</FormLabel>
                             <Popover>
                                 <PopoverTrigger asChild>
                                 <FormControl>
@@ -168,7 +179,7 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
                       <FormField control={form.control} name="amountPaid" render={({ field }) => (
                           <FormItem>
                             <FormLabel>Amount Paid</FormLabel>
-                            <FormControl><Input type="number" placeholder="0.00" {...field} value={field.value ?? ''} /></FormControl>
+                            <FormControl><Input type="number" placeholder="0.00" {...field} value={field.value ?? 0} onChange={e => field.onChange(e.target.value === '' ? 0 : parseFloat(e.target.value))} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />

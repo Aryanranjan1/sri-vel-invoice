@@ -107,21 +107,21 @@ export function AiInvoiceWizard({ invoices, setInvoices, activeInvoiceIndex, set
     }
   };
 
-  const handleViewAs = (index: number, type: 'invoice' | 'receipt') => {
+  const handleViewAs = (index: number, type: 'invoice' | 'receipt' | 'deposit') => {
     const newInvoices = [...invoices];
     const invoice = { ...newInvoices[index] };
 
     invoice.documentType = type;
 
+    let currentNumber = invoice.invoiceNumber;
     if (type === 'receipt') {
-      if (invoice.invoiceNumber.startsWith('INV-')) {
-        invoice.invoiceNumber = invoice.invoiceNumber.replace('INV-', 'REC-');
-      }
+      currentNumber = currentNumber.replace('INV-', 'REC-').replace('DEP-', 'REC-');
+    } else if (type === 'deposit') {
+      currentNumber = currentNumber.replace('INV-', 'DEP-').replace('REC-', 'DEP-');
     } else { // type === 'invoice'
-      if (invoice.invoiceNumber.startsWith('REC-')) {
-        invoice.invoiceNumber = invoice.invoiceNumber.replace('REC-', 'INV-');
-      }
+      currentNumber = currentNumber.replace('REC-', 'INV-').replace('DEP-', 'INV-');
     }
+    invoice.invoiceNumber = currentNumber;
     
     newInvoices[index] = invoice;
     setInvoices(newInvoices);
@@ -213,6 +213,7 @@ export function AiInvoiceWizard({ invoices, setInvoices, activeInvoiceIndex, set
                                 <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => handleViewAs(index, 'invoice')}>View as Invoice</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleViewAs(index, 'receipt')}>View as Receipt</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleViewAs(index, 'deposit')}>View as Deposit</DropdownMenuItem>
                                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingIndex(index); setActiveInvoiceIndex(index); }}>Edit</DropdownMenuItem>
                                 <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); handleRemoveInvoice(index);}}>Delete</DropdownMenuItem>
                                 </DropdownMenuContent>

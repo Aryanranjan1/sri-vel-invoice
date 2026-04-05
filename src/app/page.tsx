@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { cn } from '@/lib/utils';
@@ -67,6 +67,26 @@ export default function InvoicePage() {
   const watchedDocType = manualForm.watch('documentType');
   const invoiceDate = manualForm.watch('invoiceDate');
 
+  useEffect(() => {
+    const subscription = manualForm.watch((value, { name, type }) => {
+      const newValues = value as InvoiceFormValues;
+      if (name === 'documentType' && type === 'change') {
+        const currentNumber = newValues.invoiceNumber || `INV-${String(Date.now()).slice(-6)}`;
+        let newNumber = currentNumber;
+
+        if (newValues.documentType === 'receipt') {
+          newNumber = currentNumber.replace('INV-', 'REC-').replace('DEP-', 'REC-');
+        } else if (newValues.documentType === 'deposit') {
+            newNumber = currentNumber.replace('INV-', 'DEP-').replace('REC-', 'DEP-');
+        } else { // invoice
+            newNumber = currentNumber.replace('REC-', 'INV-').replace('DEP-', 'INV-');
+        }
+        manualForm.setValue('invoiceNumber', newNumber);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [manualForm]);
+
   const watchedManualData = manualForm.watch();
 
   const [aiInvoices, setAiInvoices] = useState<InvoiceFormValues[]>([]);
@@ -98,7 +118,7 @@ export default function InvoicePage() {
 
     try {
       const canvas = await html2canvas(paperElement, {
-        scale: 2, // A good scale for quality.
+        scale: 2,
         useCORS: true,
         logging: false,
       });
@@ -116,19 +136,16 @@ export default function InvoicePage() {
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
       
-      // Calculate aspect ratio of the captured image
       const ratio = canvasWidth / canvasHeight;
 
       let finalWidth = pdfWidth;
       let finalHeight = pdfWidth / ratio;
 
-      // If the content is too tall, fit it to the page height and adjust width proportionally
       if (finalHeight > pdfHeight) {
         finalHeight = pdfHeight;
         finalWidth = pdfHeight * ratio;
       }
       
-      // Center the image on the PDF page
       const xOffset = (pdfWidth - finalWidth) / 2;
       const yOffset = (pdfHeight - finalHeight) / 2;
 
@@ -154,6 +171,15 @@ export default function InvoicePage() {
     setMode(selectedMode);
     setActiveAiInvoiceIndex(null); 
   };
+
+  const getDocumentTypeLabel = (docType: string) => {
+    switch(docType) {
+      case 'invoice': return 'Invoice';
+      case 'receipt': return 'Receipt';
+      case 'deposit': return 'Deposit';
+      default: return 'Document';
+    }
+  }
 
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -214,6 +240,7 @@ export default function InvoicePage() {
                           <SelectContent>
                             <SelectItem value="invoice">Invoice</SelectItem>
                             <SelectItem value="receipt">Receipt</SelectItem>
+                            <SelectItem value="deposit">Deposit</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -223,7 +250,7 @@ export default function InvoicePage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={manualForm.control} name="invoiceNumber" render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{watchedDocType === 'invoice' ? 'Invoice' : 'Receipt'} Number</FormLabel>
+                            <FormLabel>{getDocumentTypeLabel(watchedDocType)} Number</FormLabel>
                             <FormControl><Input {...field} value={field.value ?? ''}/></FormControl>
                             <FormMessage />
                         </FormItem>
@@ -254,7 +281,7 @@ export default function InvoicePage() {
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField control={manualForm.control} name="invoiceDate" render={({ field }) => (
                           <FormItem>
-                              <FormLabel>{watchedDocType === 'invoice' ? 'Invoice' : 'Receipt'} Date</FormLabel>
+                              <FormLabel>{getDocumentTypeLabel(watchedDocType)} Date</FormLabel>
                               <Popover>
                                   <PopoverTrigger asChild>
                                   <FormControl>
@@ -295,7 +322,7 @@ export default function InvoicePage() {
                         <FormField control={manualForm.control} name="amountPaid" render={({ field }) => (
                           <FormItem>
                             <FormLabel>Amount Paid</FormLabel>
-                            <FormControl><Input type="number" placeholder="0.00" {...field} value={field.value ?? ''} /></FormControl>
+                            <FormControl><Input type="number" placeholder="0.00" {...field} value={field.value ?? 0} onChange={e => field.onChange(e.target.value === '' ? 0 : parseFloat(e.target.value))} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
@@ -420,11 +447,18 @@ export default function InvoicePage() {
               </div>
           </div>
           <div className="bg-card rounded-lg shadow-lg">
-              <div ref={invoicePreviewRef}>
+            <div
+              ref={invoicePreviewRef}
+              className="overflow-hidden rounded-lg"
+              style={{
+                aspectRatio: '210/297',
+              }}
+            >
+              <div data-invoice-paper className="w-full flex flex-col bg-white origin-top-left">
                 {previewData ? (
                   <InvoicePreview data={previewData} />
                 ) : (
-                  <div className="flex items-center justify-center text-center text-muted-foreground bg-secondary/30 rounded-md" style={{ aspectRatio: '210/297' }}>
+                  <div className="flex items-center justify-center text-center text-muted-foreground bg-secondary/30 rounded-md h-full w-full">
                     <div className="space-y-2">
                         <h3 className="font-semibold text-lg">No document to preview</h3>
                         <p className="text-sm">
@@ -437,6 +471,7 @@ export default function InvoicePage() {
                   </div>
                 )}
               </div>
+            </div>
           </div>
         </div>
       </div>

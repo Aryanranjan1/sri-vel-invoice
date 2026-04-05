@@ -19,7 +19,7 @@ export const lineItemSchema = z.object({
 });
 
 export const invoiceFormSchema = z.object({
-  documentType: z.enum(['invoice', 'receipt']).default('invoice'),
+  documentType: z.enum(['invoice', 'receipt', 'deposit']).default('invoice'),
   template: z.enum(['default', 'sri-vels', 'editorial']).default('editorial'),
   invoiceNumber: z.string().min(1, 'Number is required'),
   fromName: z.string().min(1, '"From" name is required'),

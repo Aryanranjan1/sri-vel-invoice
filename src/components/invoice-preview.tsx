@@ -8,6 +8,9 @@ import { EditorialTemplate } from './invoice/templates/editorial-template';
 import { ReceiptTemplate } from './invoice/templates/receipt-template';
 import { SriVelsReceiptTemplate } from './invoice/templates/sri-vels-receipt-template';
 import { EditorialReceiptTemplate } from './invoice/templates/editorial-receipt-template';
+import { DepositTemplate } from './invoice/templates/deposit-template';
+import { SriVelsDepositTemplate } from './invoice/templates/sri-vels-deposit-template';
+import { EditorialDepositTemplate } from './invoice/templates/editorial-deposit-template';
 
 type InvoicePreviewProps = {
   data: InvoiceFormValues;
@@ -28,6 +31,18 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
             return <ReceiptTemplate data={data} />;
         }
       }
+
+      if (data.documentType === 'deposit') {
+        switch (data.template) {
+          case 'sri-vels':
+            return <SriVelsDepositTemplate data={data} />;
+          case 'editorial':
+            return <EditorialDepositTemplate data={data} />;
+          case 'default':
+          default:
+            return <DepositTemplate data={data} />;
+        }
+      }
       
       switch (data.template) {
         case 'sri-vels':
@@ -41,11 +56,9 @@ export const InvoicePreview = React.forwardRef<HTMLDivElement, InvoicePreviewPro
     };
 
     return (
-      <div ref={ref} className="bg-card shadow-lg rounded-lg">
-        <div className='p-4 sm:p-6 md:p-10'>
-            <div data-invoice-paper className="w-full flex flex-col bg-white">
-                {renderTemplate()}
-            </div>
+      <div ref={ref} className="bg-card">
+        <div data-invoice-paper className="w-full flex flex-col bg-white">
+          {renderTemplate()}
         </div>
       </div>
     );
