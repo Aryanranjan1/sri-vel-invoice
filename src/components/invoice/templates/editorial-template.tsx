@@ -16,10 +16,15 @@ export const EditorialTemplate = ({ data }: TemplateProps) => {
     }, 0);
     const discountAmount = subtotal * ((Number(data.discountRate) || 0) / 100);
     const subtotalAfterDiscount = subtotal - discountAmount;
+
+    const depositAmountVal = data.depositAmount || 0;
+    const depositDueAmount = data.depositStatus === 'due' ? depositAmountVal : 0;
+    const depositPaidAmount = data.depositStatus === 'paid' ? depositAmountVal : 0;
+
+    // Tax is calculated on the subtotal after discount.
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
-    const total = subtotalAfterDiscount + taxAmount;
-    const depositAmount = data.depositStatus !== 'none' ? (Number(data.depositAmount) || 0) : 0;
-    const balanceDue = data.depositStatus === 'paid' ? total - depositAmount : total;
+    
+    const grandTotal = subtotalAfterDiscount + depositDueAmount - depositPaidAmount + taxAmount;
 
     const formatCurrency = (amount: number | string) => {
         const num = Number(amount);
@@ -122,37 +127,32 @@ export const EditorialTemplate = ({ data }: TemplateProps) => {
                         <span className="text-muted-foreground">Subtotal</span>
                         <span className="font-semibold">{formatCurrency(subtotal)}</span>
                     </div>
-                     {safeData.discountRate > 0 && (
+                    {safeData.discountRate > 0 && (
                         <div className="flex justify-between py-2 border-b border-border/50 text-sm">
                             <span className="text-muted-foreground">Discount ({safeData.discountRate}%)</span>
                             <span className="font-semibold">-{formatCurrency(discountAmount)}</span>
                         </div>
                     )}
-                    {data.depositStatus === 'due' && depositAmount > 0 && (
+                    {depositDueAmount > 0 && (
                         <div className="flex justify-between py-2 border-b border-border/50 text-sm">
                             <span className="text-muted-foreground">Deposit Due</span>
-                            <span className="font-semibold">{formatCurrency(depositAmount)}</span>
+                            <span className="font-semibold">{formatCurrency(depositDueAmount)}</span>
+                        </div>
+                    )}
+                    {depositPaidAmount > 0 && (
+                        <div className="flex justify-between py-2 border-b border-border/50 text-sm">
+                            <span className="text-muted-foreground">Deposit Paid</span>
+                            <span className="font-semibold">-{formatCurrency(depositPaidAmount)}</span>
                         </div>
                     )}
                     <div className="flex justify-between py-2 border-b border-border/50 text-sm">
                         <span className="text-muted-foreground">Tax ({safeData.taxRate}%)</span>
                         <span className="font-semibold">{formatCurrency(taxAmount)}</span>
                     </div>
-
-                    <div className="flex justify-between py-2 border-b border-border/50 font-semibold text-sm">
-                        <span>Total</span>
-                        <span>{formatCurrency(total)}</span>
-                    </div>
-
-                    {data.depositStatus === 'paid' && depositAmount > 0 && (
-                        <div className="flex justify-between py-2 border-b border-border/50 text-sm">
-                            <span className="text-muted-foreground">Deposit Paid</span>
-                            <span className="font-semibold">-{formatCurrency(depositAmount)}</span>
-                        </div>
-                    )}
-                    <div className="flex justify-between items-center p-3 mt-2 bg-primary text-primary-foreground rounded-md">
-                        <span className="font-extrabold text-base uppercase">Balance Due</span>
-                        <span className="font-extrabold text-base">{formatCurrency(balanceDue)}</span>
+                    
+                    <div className="flex justify-between items-center p-3 mt-4 bg-primary text-primary-foreground rounded-lg">
+                        <span className="font-extrabold text-base uppercase">Grand Total</span>
+                        <span className="font-extrabold text-base">{formatCurrency(grandTotal)}</span>
                     </div>
                 </div>
             </div>

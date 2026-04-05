@@ -16,10 +16,14 @@ export const SriVelsTemplate = ({ data }: TemplateProps) => {
     }, 0);
     const discountAmount = subtotal * ((Number(data.discountRate) || 0) / 100);
     const subtotalAfterDiscount = subtotal - discountAmount;
+
+    const depositAmountVal = data.depositAmount || 0;
+    const depositDueAmount = data.depositStatus === 'due' ? depositAmountVal : 0;
+    const depositPaidAmount = data.depositStatus === 'paid' ? depositAmountVal : 0;
+    
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
-    const total = subtotalAfterDiscount + taxAmount;
-    const depositAmount = data.depositStatus !== 'none' ? (Number(data.depositAmount) || 0) : 0;
-    const balanceDue = data.depositStatus === 'paid' ? total - depositAmount : total;
+
+    const grandTotal = subtotalAfterDiscount + depositDueAmount - depositPaidAmount + taxAmount;
 
 
     const formatCurrency = (amount: number | string) => {
@@ -125,16 +129,22 @@ export const SriVelsTemplate = ({ data }: TemplateProps) => {
                             <td className="py-2 text-muted-foreground">Subtotal</td>
                             <td className='text-right font-medium'>{formatCurrency(subtotal)}</td>
                         </tr>
-                         {safeData.discountRate > 0 && (
+                        {safeData.discountRate > 0 && (
                             <tr>
                                 <td className="py-2 text-muted-foreground">Discount ({safeData.discountRate}%)</td>
                                 <td className='text-right font-medium'>-{formatCurrency(discountAmount)}</td>
                             </tr>
                         )}
-                        {data.depositStatus === 'due' && depositAmount > 0 && (
+                        {depositDueAmount > 0 && (
                             <tr>
                                 <td className="py-2 text-muted-foreground">Deposit Due</td>
-                                <td className='text-right font-medium'>{formatCurrency(depositAmount)}</td>
+                                <td className='text-right font-medium'>{formatCurrency(depositDueAmount)}</td>
+                            </tr>
+                        )}
+                        {depositPaidAmount > 0 && (
+                            <tr>
+                                <td className="py-2 text-muted-foreground">Deposit Paid</td>
+                                <td className='text-right font-medium'>-{formatCurrency(depositPaidAmount)}</td>
                             </tr>
                         )}
                         <tr>
@@ -142,23 +152,11 @@ export const SriVelsTemplate = ({ data }: TemplateProps) => {
                             <td className='text-right font-medium'>{formatCurrency(taxAmount)}</td>
                         </tr>
                         
-                        <tr className="font-semibold">
-                            <td className="py-2 border-t border-border">Total</td>
-                            <td className='text-right border-t border-border'>{formatCurrency(total)}</td>
-                        </tr>
-
-                        {data.depositStatus === 'paid' && depositAmount > 0 && (
-                            <tr className="font-medium text-muted-foreground">
-                                <td className="py-2">Deposit Paid</td>
-                                <td className='text-right'>-{formatCurrency(depositAmount)}</td>
-                            </tr>
-                        )}
-
                         <tr className="font-bold text-base">
                              <td colSpan={2} className="p-0 !pt-4">
-                                <div className="flex justify-between items-center bg-primary text-primary-foreground p-3 rounded-md">
-                                    <span>Balance Due</span>
-                                    <span>{formatCurrency(balanceDue)}</span>
+                                <div className="flex justify-between items-center bg-primary text-primary-foreground p-3 rounded-lg">
+                                    <span className="uppercase">Grand Total</span>
+                                    <span>{formatCurrency(grandTotal)}</span>
                                 </div>
                             </td>
                         </tr>

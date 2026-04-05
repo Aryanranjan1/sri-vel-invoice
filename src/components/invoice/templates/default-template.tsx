@@ -16,10 +16,15 @@ export const DefaultTemplate = ({ data }: TemplateProps) => {
     }, 0);
     const discountAmount = subtotal * ((Number(data.discountRate) || 0) / 100);
     const subtotalAfterDiscount = subtotal - discountAmount;
+
+    const depositAmountVal = data.depositAmount || 0;
+    const depositDueAmount = data.depositStatus === 'due' ? depositAmountVal : 0;
+    const depositPaidAmount = data.depositStatus === 'paid' ? depositAmountVal : 0;
+
+    // Tax is calculated on the subtotal after discount.
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
-    const total = subtotalAfterDiscount + taxAmount;
-    const depositAmount = data.depositStatus !== 'none' ? (Number(data.depositAmount) || 0) : 0;
-    const balanceDue = data.depositStatus === 'paid' ? total - depositAmount : total;
+
+    const grandTotal = subtotalAfterDiscount + depositDueAmount - depositPaidAmount + taxAmount;
 
     const formatCurrency = (amount: number | string) => {
         const num = Number(amount);
@@ -107,7 +112,10 @@ export const DefaultTemplate = ({ data }: TemplateProps) => {
             {/* Totals */}
             <div className="mt-8 ml-auto w-full max-w-[280px]">
                 <div className="space-y-2 text-sm">
-                    <div className="flex justify-between text-muted-foreground"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
+                    <div className="flex justify-between text-muted-foreground">
+                        <span>Subtotal</span>
+                        <span>{formatCurrency(subtotal)}</span>
+                    </div>
                     
                     {safeData.discountRate > 0 && (
                         <div className="flex justify-between text-muted-foreground">
@@ -116,10 +124,17 @@ export const DefaultTemplate = ({ data }: TemplateProps) => {
                         </div>
                     )}
 
-                    {data.depositStatus === 'due' && depositAmount > 0 && (
+                    {depositDueAmount > 0 && (
                         <div className="flex justify-between text-muted-foreground">
                             <span>Deposit Due</span>
-                            <span>{formatCurrency(depositAmount)}</span>
+                            <span>{formatCurrency(depositDueAmount)}</span>
+                        </div>
+                    )}
+
+                    {depositPaidAmount > 0 && (
+                         <div className="flex justify-between text-muted-foreground">
+                            <span>Deposit Paid</span>
+                            <span>-{formatCurrency(depositPaidAmount)}</span>
                         </div>
                     )}
 
@@ -127,23 +142,11 @@ export const DefaultTemplate = ({ data }: TemplateProps) => {
                         <span>Tax ({safeData.taxRate}%)</span>
                         <span>{formatCurrency(taxAmount)}</span>
                     </div>
-
-                    <div className="flex justify-between text-muted-foreground font-semibold pt-2 border-t">
-                        <span>Total</span>
-                        <span>{formatCurrency(total)}</span>
-                    </div>
-
-                    {data.depositStatus === 'paid' && depositAmount > 0 && (
-                         <div className="flex justify-between text-muted-foreground">
-                            <span>Deposit Paid</span>
-                            <span>-{formatCurrency(depositAmount)}</span>
-                        </div>
-                    )}
                     
                     <div className="!mt-4">
-                        <div className="flex justify-between items-center bg-primary text-primary-foreground font-semibold text-base p-3 rounded-md">
-                            <span>Balance Due</span>
-                            <span>{formatCurrency(balanceDue)}</span>
+                        <div className="flex justify-between items-center bg-primary text-primary-foreground font-bold text-base p-3 rounded-lg">
+                            <span className="uppercase">Grand Total</span>
+                            <span>{formatCurrency(grandTotal)}</span>
                         </div>
                     </div>
                 </div>
