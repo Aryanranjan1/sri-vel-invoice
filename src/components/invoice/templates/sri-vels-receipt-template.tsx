@@ -19,7 +19,7 @@ export const SriVelsReceiptTemplate = ({ data }: TemplateProps) => {
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
 
-    const amountPaid = (data.amountPaid !== undefined && data.amountPaid !== null && !isNaN(Number(data.amountPaid)) && String(data.amountPaid).trim() !== '')
+    const amountPaid = (data.amountPaid !== undefined && data.amountPaid !== null && !isNaN(Number(data.amountPaid)) && String(data.amountPaid).trim() !== '' && Number(data.amountPaid) > 0)
       ? Number(data.amountPaid)
       : total;
     const balanceDue = total - amountPaid;
@@ -44,7 +44,7 @@ export const SriVelsReceiptTemplate = ({ data }: TemplateProps) => {
     };
 
     return (
-        <div className="text-primary flex flex-col p-4 sm:p-8 md:p-12 text-[9px] sm:text-[10px] md:text-xs font-sans h-full">
+        <div className="text-primary flex flex-col p-4 sm:p-8 md:p-12 text-[9px] sm:text-[10px] md:text-xs font-sans">
             {/* Header */}
             <header className="flex justify-between items-start mb-10 pb-6 border-b-2 border-primary">
                 <div>

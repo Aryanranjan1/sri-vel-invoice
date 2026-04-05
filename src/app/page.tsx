@@ -137,19 +137,20 @@ export default function InvoicePage() {
       const canvasHeight = canvas.height;
       
       const ratio = canvasWidth / canvasHeight;
-
-      let finalWidth = pdfWidth;
-      let finalHeight = pdfWidth / ratio;
-
-      if (finalHeight > pdfHeight) {
-        finalHeight = pdfHeight;
-        finalWidth = pdfHeight * ratio;
-      }
+      const imgHeight = pdfWidth / ratio;
+      let heightLeft = imgHeight;
       
-      const xOffset = (pdfWidth - finalWidth) / 2;
-      const yOffset = (pdfHeight - finalHeight) / 2;
+      let position = 0;
 
-      pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+      heightLeft -= pdfHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
 
       pdf.save(`${previewData.documentType}-${previewData.invoiceNumber || 'download'}.pdf`);
 
@@ -450,9 +451,6 @@ export default function InvoicePage() {
             <div
               ref={invoicePreviewRef}
               className="overflow-hidden rounded-lg"
-              style={{
-                aspectRatio: '210/297',
-              }}
             >
               <div data-invoice-paper className="w-full flex flex-col bg-white origin-top-left">
                 {previewData ? (
