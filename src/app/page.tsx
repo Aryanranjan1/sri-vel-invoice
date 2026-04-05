@@ -22,6 +22,7 @@ import { format } from 'date-fns';
 import { useFieldArray } from 'react-hook-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function InvoicePage() {
   const [mode, setMode] = useState<'manual' | 'ai'>('manual');
@@ -46,6 +47,8 @@ export default function InvoicePage() {
     taxRate: 0,
     discountRate: 0,
     amountPaid: 0,
+    includeDeposit: false,
+    depositAmount: 0,
     paymentDetails: {
       bankName: 'MAYBANK',
       accountName: 'SRI VELS CATERING',
@@ -464,6 +467,47 @@ export default function InvoicePage() {
                           <FormItem><FormLabel>Tax (%)</FormLabel><FormControl><Input type="number" placeholder="0" {...field} value={field.value ?? 0} /></FormControl><FormMessage /></FormItem>
                       )} />
                   </div>
+                  {watchedDocType === 'invoice' && (
+                    <div className="space-y-4 pt-4">
+                      <FormField
+                        control={manualForm.control}
+                        name="includeDeposit"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal text-sm !mt-0">
+                              Include Deposit Payment
+                            </FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      {manualForm.watch('includeDeposit') && (
+                        <FormField
+                          control={manualForm.control}
+                          name="depositAmount"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Deposit Amount</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  placeholder="0.00"
+                                  {...field}
+                                  onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                    </div>
+                  )}
                   <FormField control={manualForm.control} name="notes" render={({ field }) => (
                       <FormItem><FormLabel>Notes</FormLabel><FormControl><Textarea placeholder="Add any additional notes for the client..." className="resize-none" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                   )} />

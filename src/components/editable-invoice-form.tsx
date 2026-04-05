@@ -25,6 +25,7 @@ import { useEffect } from 'react';
 import { type InvoiceFormValues, invoiceFormSchema } from '@/types/invoice';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from './ui/calendar';
+import { Checkbox } from './ui/checkbox';
 
 interface EditableInvoiceFormProps {
     initialData: InvoiceFormValues;
@@ -257,6 +258,47 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
                         <FormItem><FormLabel>Tax (%)</FormLabel><FormControl><Input type="number" placeholder="0" {...field} value={field.value ?? 0} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
+                 {watchedDocType === 'invoice' && (
+                    <div className="space-y-4 pt-4">
+                        <FormField
+                            control={form.control}
+                            name="includeDeposit"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                        <Checkbox
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                    <FormLabel className="font-normal text-sm !mt-0">
+                                        Include Deposit Payment
+                                    </FormLabel>
+                                </FormItem>
+                            )}
+                        />
+                        {form.watch('includeDeposit') && (
+                            <FormField
+                                control={form.control}
+                                name="depositAmount"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Deposit Amount</FormLabel>
+                                        <FormControl>
+                                            <Input 
+                                                type="number" 
+                                                placeholder="0.00" 
+                                                {...field} 
+                                                onChange={e => field.onChange(parseFloat(e.target.value) || 0)} 
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
+                    </div>
+                )}
                 <FormField control={form.control} name="notes" render={({ field }) => (
                     <FormItem><FormLabel>Notes</FormLabel><FormControl><Textarea placeholder="Add any additional notes for the client..." className="resize-none" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                 )} />

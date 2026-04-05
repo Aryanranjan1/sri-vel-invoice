@@ -18,6 +18,9 @@ export const SriVelsTemplate = ({ data }: TemplateProps) => {
     const subtotalAfterDiscount = subtotal - discountAmount;
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
+    const depositAmount = data.includeDeposit ? (Number(data.depositAmount) || 0) : 0;
+    const balanceDue = total - depositAmount;
+
 
     const formatCurrency = (amount: number | string) => {
         const num = Number(amount);
@@ -132,9 +135,19 @@ export const SriVelsTemplate = ({ data }: TemplateProps) => {
                             <td className="py-2 text-muted-foreground">Tax ({safeData.taxRate}%)</td>
                             <td id="taxAmount" className='text-right font-semibold'>{formatCurrency(taxAmount)}</td>
                         </tr>
+                        <tr className="font-semibold">
+                            <td className="py-2 border-t border-border">Total</td>
+                            <td className='text-right border-t border-border'>{formatCurrency(total)}</td>
+                        </tr>
+                        {depositAmount > 0 && (
+                            <tr className="font-semibold text-muted-foreground">
+                                <td className="py-2">Deposit Paid</td>
+                                <td className='text-right'>-{formatCurrency(depositAmount)}</td>
+                            </tr>
+                        )}
                         <tr className="font-bold text-base">
-                            <td className="py-3 border-y-2 border-primary">Grand Total</td>
-                            <td id="grandTotalAmount" className='text-right border-y-2 border-primary'>{formatCurrency(total)}</td>
+                            <td className="py-3 border-y-2 border-primary">{depositAmount > 0 ? 'Balance Due' : 'Grand Total'}</td>
+                            <td id="grandTotalAmount" className='text-right border-y-2 border-primary'>{formatCurrency(balanceDue)}</td>
                         </tr>
                     </tbody>
                 </table>

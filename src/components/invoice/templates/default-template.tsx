@@ -18,6 +18,8 @@ export const DefaultTemplate = ({ data }: TemplateProps) => {
     const subtotalAfterDiscount = subtotal - discountAmount;
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
+    const depositAmount = data.includeDeposit ? (Number(data.depositAmount) || 0) : 0;
+    const balanceDue = total - depositAmount;
 
     const formatCurrency = (amount: number | string) => {
         const num = Number(amount);
@@ -109,7 +111,18 @@ export const DefaultTemplate = ({ data }: TemplateProps) => {
                     {safeData.discountRate > 0 && <div className="flex justify-between text-muted-foreground"><span>Discount ({safeData.discountRate}%)</span><span>-{formatCurrency(discountAmount)}</span></div>}
                     <div className="flex justify-between text-muted-foreground"><span>Tax ({safeData.taxRate}%)</span><span>{formatCurrency(taxAmount)}</span></div>
                     <div className="border-t my-2"></div>
-                    <div className="flex justify-between font-semibold text-base"><span>Total Due</span><span>{formatCurrency(total)}</span></div>
+                    <div className="flex justify-between font-semibold text-base"><span>Total</span><span>{formatCurrency(total)}</span></div>
+                    {depositAmount > 0 && (
+                        <div className="flex justify-between text-muted-foreground">
+                            <span>Deposit Paid</span>
+                            <span>-{formatCurrency(depositAmount)}</span>
+                        </div>
+                    )}
+                    {depositAmount > 0 && <div className="border-t my-2"></div>}
+                    <div className="flex justify-between font-semibold text-base">
+                        <span>{depositAmount > 0 ? 'Balance Due' : 'Total Due'}</span>
+                        <span>{formatCurrency(balanceDue)}</span>
+                    </div>
                 </div>
             </div>
 
