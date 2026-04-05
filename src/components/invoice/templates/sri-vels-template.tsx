@@ -136,6 +136,11 @@ export const SriVelsTemplate = ({ data }: TemplateProps) => {
                             <td id="taxAmount" className='text-right font-semibold'>{formatCurrency(taxAmount)}</td>
                         </tr>
                         
+                        <tr className="font-semibold">
+                            <td className="py-2 border-t border-border">Grand Total</td>
+                            <td className='text-right border-t border-border'>{formatCurrency(total)}</td>
+                        </tr>
+
                         {data.depositStatus === 'paid' && depositAmount > 0 && (
                             <tr className="font-semibold text-muted-foreground">
                                 <td className="py-2">Deposit Paid</td>
@@ -144,9 +149,16 @@ export const SriVelsTemplate = ({ data }: TemplateProps) => {
                         )}
 
                         <tr className="font-bold text-base">
-                            <td className="py-3 border-y-2 border-primary">{data.depositStatus === 'paid' ? 'Balance Due' : 'Grand Total'}</td>
+                            <td className="py-3 border-y-2 border-primary">Balance Due</td>
                             <td id="grandTotalAmount" className='text-right border-y-2 border-primary'>{formatCurrency(balanceDue)}</td>
                         </tr>
+                         {data.depositStatus === 'due' && depositAmount > 0 && (
+                            <tr>
+                                <td colSpan={2} className="pt-2 text-right text-muted-foreground text-sm">
+                                   A deposit of {formatCurrency(depositAmount)} is due.
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -170,11 +182,6 @@ export const SriVelsTemplate = ({ data }: TemplateProps) => {
                         <div className="text-muted-foreground text-sm whitespace-pre-line">
                            {safeData.notes}
                         </div>
-                        {data.depositStatus === 'due' && depositAmount > 0 && (
-                            <div className="text-muted-foreground text-sm mt-4">
-                               <strong className="text-primary">Deposit Required:</strong> A deposit of {formatCurrency(depositAmount)} is due.
-                            </div>
-                        )}
                     </div>
                 </div>
             </footer>

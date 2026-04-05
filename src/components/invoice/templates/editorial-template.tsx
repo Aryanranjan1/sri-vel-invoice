@@ -132,6 +132,12 @@ export const EditorialTemplate = ({ data }: TemplateProps) => {
                         <span className="text-muted-foreground">Tax ({safeData.taxRate}%)</span>
                         <span className="font-semibold">{formatCurrency(taxAmount)}</span>
                     </div>
+
+                    <div className="flex justify-between py-2 border-b border-border/50 font-semibold text-sm">
+                        <span>Grand Total</span>
+                        <span>{formatCurrency(total)}</span>
+                    </div>
+
                     {data.depositStatus === 'paid' && depositAmount > 0 && (
                         <div className="flex justify-between py-2 border-b border-border/50 text-sm">
                             <span className="text-muted-foreground">Deposit Paid</span>
@@ -139,7 +145,7 @@ export const EditorialTemplate = ({ data }: TemplateProps) => {
                         </div>
                     )}
                     <div className="flex justify-between items-center p-3 mt-2 bg-primary text-primary-foreground rounded-md">
-                        <span className="font-extrabold text-base uppercase">{data.depositStatus === 'paid' ? 'Balance Due' : 'Grand Total'}</span>
+                        <span className="font-extrabold text-base uppercase">Balance Due</span>
                         <span className="font-extrabold text-base">{formatCurrency(balanceDue)}</span>
                     </div>
                     {data.depositStatus === 'due' && depositAmount > 0 && (
