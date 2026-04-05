@@ -25,7 +25,6 @@ import { useEffect } from 'react';
 import { type InvoiceFormValues, invoiceFormSchema } from '@/types/invoice';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from './ui/calendar';
-import { Checkbox } from './ui/checkbox';
 
 interface EditableInvoiceFormProps {
     initialData: InvoiceFormValues;
@@ -262,22 +261,27 @@ export function EditableInvoiceForm({ initialData, onUpdate }: EditableInvoiceFo
                     <div className="space-y-4 pt-4">
                         <FormField
                             control={form.control}
-                            name="includeDeposit"
+                            name="depositStatus"
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                <FormItem>
+                                    <FormLabel>Deposit Status</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
-                                        <Checkbox
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                        />
+                                        <SelectTrigger>
+                                        <SelectValue placeholder="Select deposit status" />
+                                        </SelectTrigger>
                                     </FormControl>
-                                    <FormLabel className="font-normal text-sm !mt-0">
-                                        Include Deposit Payment
-                                    </FormLabel>
+                                    <SelectContent>
+                                        <SelectItem value="none">No Deposit</SelectItem>
+                                        <SelectItem value="paid">Deposit Paid</SelectItem>
+                                        <SelectItem value="due">Deposit Due</SelectItem>
+                                    </SelectContent>
+                                    </Select>
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        {form.watch('includeDeposit') && (
+                        {form.watch('depositStatus') !== 'none' && (
                             <FormField
                                 control={form.control}
                                 name="depositAmount"

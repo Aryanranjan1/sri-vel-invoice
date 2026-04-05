@@ -18,8 +18,8 @@ export const EditorialTemplate = ({ data }: TemplateProps) => {
     const subtotalAfterDiscount = subtotal - discountAmount;
     const taxAmount = subtotalAfterDiscount * ((Number(data.taxRate) || 0) / 100);
     const total = subtotalAfterDiscount + taxAmount;
-    const depositAmount = data.includeDeposit ? (Number(data.depositAmount) || 0) : 0;
-    const balanceDue = total - depositAmount;
+    const depositAmount = data.depositStatus !== 'none' ? (Number(data.depositAmount) || 0) : 0;
+    const balanceDue = data.depositStatus === 'paid' ? total - depositAmount : total;
 
     const formatCurrency = (amount: number | string) => {
         const num = Number(amount);
@@ -132,20 +132,21 @@ export const EditorialTemplate = ({ data }: TemplateProps) => {
                         <span className="text-muted-foreground">Tax ({safeData.taxRate}%)</span>
                         <span className="font-semibold">{formatCurrency(taxAmount)}</span>
                     </div>
-                     <div className="flex justify-between py-2 font-semibold border-b border-border/50 text-sm">
-                        <span>Total</span>
-                        <span>{formatCurrency(total)}</span>
-                    </div>
-                    {depositAmount > 0 && (
+                    {data.depositStatus === 'paid' && depositAmount > 0 && (
                         <div className="flex justify-between py-2 border-b border-border/50 text-sm">
                             <span className="text-muted-foreground">Deposit Paid</span>
                             <span className="font-semibold">-{formatCurrency(depositAmount)}</span>
                         </div>
                     )}
                     <div className="flex justify-between items-center p-3 mt-2 bg-primary text-primary-foreground rounded-md">
-                        <span className="font-extrabold text-base uppercase">{depositAmount > 0 ? 'Balance Due' : 'Grand Total'}</span>
+                        <span className="font-extrabold text-base uppercase">{data.depositStatus === 'paid' ? 'Balance Due' : 'Grand Total'}</span>
                         <span className="font-extrabold text-base">{formatCurrency(balanceDue)}</span>
                     </div>
+                    {data.depositStatus === 'due' && depositAmount > 0 && (
+                        <div className="mt-2 text-sm text-muted-foreground text-right">
+                           A deposit of {formatCurrency(depositAmount)} is due.
+                        </div>
+                    )}
                 </div>
             </div>
 

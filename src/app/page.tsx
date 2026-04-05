@@ -22,7 +22,6 @@ import { format } from 'date-fns';
 import { useFieldArray } from 'react-hook-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Checkbox } from '@/components/ui/checkbox';
 
 export default function InvoicePage() {
   const [mode, setMode] = useState<'manual' | 'ai'>('manual');
@@ -47,7 +46,7 @@ export default function InvoicePage() {
     taxRate: 0,
     discountRate: 0,
     amountPaid: 0,
-    includeDeposit: false,
+    depositStatus: 'none',
     depositAmount: 0,
     paymentDetails: {
       bankName: 'MAYBANK',
@@ -135,27 +134,14 @@ export default function InvoicePage() {
       });
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
       
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
       
       const ratio = canvasWidth / canvasHeight;
       const imgHeight = pdfWidth / ratio;
-      let heightLeft = imgHeight;
       
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-      heightLeft -= pdfHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-        heightLeft -= pdfHeight;
-      }
-
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
 
       pdf.save(`${previewData.documentType}-${previewData.invoiceNumber || 'download'}.pdf`);
 
@@ -471,22 +457,27 @@ export default function InvoicePage() {
                     <div className="space-y-4 pt-4">
                       <FormField
                         control={manualForm.control}
-                        name="includeDeposit"
+                        name="depositStatus"
                         render={({ field }) => (
-                          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal text-sm !mt-0">
-                              Include Deposit Payment
-                            </FormLabel>
+                          <FormItem>
+                            <FormLabel>Deposit Status</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select deposit status" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="none">No Deposit</SelectItem>
+                                <SelectItem value="paid">Deposit Paid</SelectItem>
+                                <SelectItem value="due">Deposit Due</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
-                      {manualForm.watch('includeDeposit') && (
+                      {manualForm.watch('depositStatus') !== 'none' && (
                         <FormField
                           control={manualForm.control}
                           name="depositAmount"

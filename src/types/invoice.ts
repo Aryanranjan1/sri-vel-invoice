@@ -38,7 +38,7 @@ export const invoiceFormSchema = z.object({
   notes: z.string().optional(),
   taxRate: z.coerce.number().min(0).max(100).optional().default(0),
   discountRate: z.coerce.number().min(0).max(100).optional().default(0),
-  includeDeposit: z.boolean().optional().default(false),
+  depositStatus: z.enum(['none', 'paid', 'due']).optional().default('none'),
   depositAmount: z.coerce.number().min(0).optional().default(0),
   paymentDetails: z.object({
     bankName: z.string().optional(),
