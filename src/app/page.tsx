@@ -8,7 +8,7 @@ import { AiInvoiceWizard } from '@/components/ai-invoice-wizard';
 import { InvoicePreview } from '@/components/invoice-preview';
 import { type InvoiceFormValues, invoiceFormSchema } from '@/types/invoice';
 import { Button } from '@/components/ui/button';
-import { Bot, Download, CheckCircle2, Plus, Trash2 } from 'lucide-react';
+import { Bot, Download, CheckCircle2, Plus, Trash2, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -21,6 +21,7 @@ import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { useFieldArray } from 'react-hook-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function InvoicePage() {
   const [mode, setMode] = useState<'manual' | 'ai'>('manual');
@@ -99,7 +100,7 @@ export default function InvoicePage() {
     previewData = aiInvoices[activeAiInvoiceIndex];
   }
 
-  const handleDownload = async () => {
+  const handleDownloadPdf = async () => {
     const paperElement = invoicePreviewRef.current?.querySelector<HTMLDivElement>('[data-invoice-paper]');
 
     if (!paperElement || !previewData) {
@@ -152,6 +153,7 @@ export default function InvoicePage() {
         heightLeft -= pdfHeight;
       }
 
+
       pdf.save(`${previewData.documentType}-${previewData.invoiceNumber || 'download'}.pdf`);
 
       toast({
@@ -164,6 +166,53 @@ export default function InvoicePage() {
         variant: 'destructive',
         title: 'Download Failed',
         description: 'An unexpected error occurred while generating the PDF.',
+      });
+    }
+  };
+
+  const handleDownloadImage = async () => {
+    const paperElement = invoicePreviewRef.current?.querySelector<HTMLDivElement>('[data-invoice-paper]');
+
+    if (!paperElement || !previewData) {
+      toast({
+        variant: 'destructive',
+        title: 'Preview Not Found',
+        description: 'Cannot download image because the preview is not available.',
+      });
+      return;
+    }
+
+    toast({
+      title: 'Generating Image...',
+      description: `Your ${previewData.documentType} is being prepared for download.`,
+    });
+
+    try {
+      const canvas = await html2canvas(paperElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      
+      const link = document.createElement('a');
+      link.href = imgData;
+      link.download = `${previewData.documentType}-${previewData.invoiceNumber || 'download'}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: 'Download Started!',
+        description: `Your ${previewData.documentType} image has been successfully generated.`,
+      });
+    } catch (error) {
+      console.error(`Failed to download ${previewData.documentType} as image:`, error);
+      toast({
+        variant: 'destructive',
+        title: 'Download Failed',
+        description: 'An unexpected error occurred while generating the image.',
       });
     }
   };
@@ -211,9 +260,23 @@ export default function InvoicePage() {
         </div>
         
         <div className="text-center sm:text-right">
-          <Button onClick={handleDownload} disabled={!previewData}>
-            <Download size={16} /> Download PDF
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button disabled={!previewData}>
+                <Download size={16} /> Download
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleDownloadPdf}>
+                <Download size={16} className="mr-2" />
+                <span>PDF</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDownloadImage}>
+                <ImageIcon size={16} className="mr-2" />
+                <span>Image (PNG)</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
@@ -361,7 +424,7 @@ export default function InvoicePage() {
                   )} />
                    <FormField control={manualForm.control} name="toEmail" render={({ field }) => (
                       <FormItem><FormLabel>Email (Optional)</FormLabel><FormControl><Input placeholder="client.email@company.com" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
-                  )} />
+                   )} />
               </div>
       
               {/* Section: Items */}
