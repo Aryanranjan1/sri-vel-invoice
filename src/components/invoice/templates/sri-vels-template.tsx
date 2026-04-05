@@ -119,44 +119,48 @@ export const SriVelsTemplate = ({ data }: TemplateProps) => {
 
             {/* Totals */}
             <div className="mt-8 flex justify-end">
-                 <table className="w-[250px]">
+                 <table className="w-[250px] text-sm">
                     <tbody>
                         <tr>
                             <td className="py-2 text-muted-foreground">Subtotal</td>
-                            <td className='text-right font-semibold'>{formatCurrency(subtotal)}</td>
+                            <td className='text-right font-medium'>{formatCurrency(subtotal)}</td>
                         </tr>
                          {safeData.discountRate > 0 && (
                             <tr>
                                 <td className="py-2 text-muted-foreground">Discount ({safeData.discountRate}%)</td>
-                                <td className='text-right font-semibold'>-{formatCurrency(discountAmount)}</td>
+                                <td className='text-right font-medium'>-{formatCurrency(discountAmount)}</td>
                             </tr>
                         )}
                         {data.depositStatus === 'due' && depositAmount > 0 && (
                             <tr>
                                 <td className="py-2 text-muted-foreground">Deposit Due</td>
-                                <td className='text-right font-normal'>{formatCurrency(depositAmount)}</td>
+                                <td className='text-right font-medium'>{formatCurrency(depositAmount)}</td>
                             </tr>
                         )}
                         <tr>
                             <td className="py-2 text-muted-foreground">Tax ({safeData.taxRate}%)</td>
-                            <td className='text-right font-semibold'>{formatCurrency(taxAmount)}</td>
+                            <td className='text-right font-medium'>{formatCurrency(taxAmount)}</td>
                         </tr>
                         
                         <tr className="font-semibold">
-                            <td className="py-2 border-t border-border">Grand Total</td>
+                            <td className="py-2 border-t border-border">Total</td>
                             <td className='text-right border-t border-border'>{formatCurrency(total)}</td>
                         </tr>
 
                         {data.depositStatus === 'paid' && depositAmount > 0 && (
-                            <tr className="font-semibold text-muted-foreground">
+                            <tr className="font-medium text-muted-foreground">
                                 <td className="py-2">Deposit Paid</td>
                                 <td className='text-right'>-{formatCurrency(depositAmount)}</td>
                             </tr>
                         )}
 
                         <tr className="font-bold text-base">
-                            <td className="py-3 border-y-2 border-primary">Balance Due</td>
-                            <td className='text-right border-y-2 border-primary'>{formatCurrency(balanceDue)}</td>
+                             <td colSpan={2} className="p-0 !pt-4">
+                                <div className="flex justify-between items-center bg-primary text-primary-foreground p-3 rounded-md">
+                                    <span>Balance Due</span>
+                                    <span>{formatCurrency(balanceDue)}</span>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
